@@ -7,14 +7,7 @@ import Products from './components/Products';
 import ProductDetail from './components/ProductDetail';
 import StockReconciliation from './components/StockReconciliation';
 import './App.css';
-import React from "react";
-//import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Routes, Route } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
-import TopBar from "./components/TopBar";
-import Dashboard from "./components/Dashboard";
 import Invoice from "./components/Invoice";
-import Products from "./components/Products";
 import InvoiceHistory from "./components/InvoiceHistory";
 
 import "./App.css";
@@ -48,7 +41,7 @@ function App() {
           {renderPage()}
         </div>
       </div>
-    
+    </div>
   );
 }
 
