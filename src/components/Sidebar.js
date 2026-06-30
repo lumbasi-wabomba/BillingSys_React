@@ -15,6 +15,7 @@ import stocksLogo from '../icons/stock.png';
 import userLogo from '../icons/user.png';
 import transferLogo from '../icons/transfer.png';
 import expenseLogo from '../icons/expense.png';
+import invoicesLogo from '../icons/invoice.webp';
 
 const Icon = ({ name }) => {
     const icons = {
@@ -32,6 +33,7 @@ const Icon = ({ name }) => {
     users:<img src={userLogo} alt="" />,
     transfer:<img src={transferLogo} alt="" />,
     returns:<img src={returnsLogo} alt="" />,
+    invoices:<img src={invoicesLogo} alt="" />,
   };
   return (
     <span style={{
@@ -66,6 +68,7 @@ const navItems = [
   { id: 'suppliers', label: 'Suppliers', icon: 'suppliers' },
   { id: 'users', label: 'Users', icon: 'users' },
   { label: 'Analytics', type: 'section' },
+  {label: 'Invoices', id: 'invoice', icon: 'invoices'},
   { id: 'reports', label: 'Reports', icon: 'reports' },
   { label: 'System', type: 'section' },
   { id: 'settings', label: 'Settings', icon: 'settings' },

@@ -17,6 +17,7 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const navigate = (page, data = null) => {
+    console.log("SIDEBAR CLICKED PAGE ID:", page);
     setActivePage(page);
     if (data) setSelectedProduct(data);
   };
@@ -28,6 +29,8 @@ function App() {
       case 'products': return <Products onProductClick={(p) => navigate('product-detail', p)} />;
       case 'product-detail': return <ProductDetail product={selectedProduct} onBack={() => navigate('products')} />;
       case 'stock-reconciliation': return <StockReconciliation />;
+      case 'invoice': return <Invoice navigate={navigate} />;
+      case 'invoice-history': return <InvoiceHistory navigate={navigate} />;
       default: return <Dashboard />;
     }
   };

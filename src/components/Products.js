@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../App.css';
 
-const products = [
+export const products = [
   { id: 1, name: 'Apple iPhone 15 Pro Max', sku: 'PHN-001', category: 'Electronics', brand: 'Apple', unit: 'Piece', price: '$1,299', purchasePrice: '$950', qty: 45, minQty: 10, warehouse: 'Main Store', status: 'Active', icon: '📱' },
   { id: 2, name: 'Dell XPS 15 Laptop (32GB)', sku: 'LPT-042', category: 'Electronics', brand: 'Dell', unit: 'Piece', price: '$2,199', purchasePrice: '$1,700', qty: 12, minQty: 5, warehouse: 'Main Store', status: 'Active', icon: '💻' },
   { id: 3, name: 'Samsung 55" QLED TV', sku: 'TV-007', category: 'Electronics', brand: 'Samsung', unit: 'Piece', price: '$1,099', purchasePrice: '$780', qty: 8, minQty: 5, warehouse: 'Branch A', status: 'Active', icon: '📺' },
