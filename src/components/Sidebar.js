@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../App.css';
 
 function Sidebar() {
@@ -6,10 +7,9 @@ function Sidebar() {
     <div className="sidebar">
       <h2>BillSystem</h2>
       <ul>
-        <li>Dashboard</li>
-        <li>Invoices</li>
-        <li>Reports</li>
-        <li>Settings</li>
+        <li><Link to="/">Dashboard</Link></li>
+        <li><Link to="/invoice">Invoices</Link></li>
+        <li><Link to="/reports">Reports</Link></li>
       </ul>
     </div>
   );

@@ -6,7 +6,7 @@ function TopBar() {
     <div className="topbar">
       <h3>Dashboard</h3>
       <div className="topbar-right">
-        <span>Welcome, Wayne</span>
+        <span>Welcome</span>
       </div>
     </div>
   );
