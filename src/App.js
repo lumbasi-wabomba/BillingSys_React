@@ -1,24 +1,51 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import Dashboard from './components/Dashboard';
-import Invoice from './components/Invoice';
 import Reports from './components/Reports';
+import Products from './components/Products';
+import ProductDetail from './components/ProductDetail';
+import StockReconciliation from './components/StockReconciliation';
+import Invoice from "./components/Invoice";
+import InvoiceHistory from "./components/InvoiceHistory";
+import StockTransfer from "./components/StockTransfer";
+import Purchase from "./components/Purchase";
+import Expenses from "./components/Expenses";
 import './App.css';
 
 function App() {
+  const [activePage, setActivePage] = useState('dashboard');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const navigate = (page, data = null) => {
+    console.log("SIDEBAR CLICKED PAGE ID:", page);
+    setActivePage(page);
+    if (data) setSelectedProduct(data);
+  };
+
+  const renderPage = () => {
+    switch (activePage) {
+      case 'dashboard': return <Dashboard />;
+      case 'reports': return <Reports />;
+      case 'products': return <Products onProductClick={(p) => navigate('product-detail', p)} />;
+      case 'product-detail': return <ProductDetail product={selectedProduct} onBack={() => navigate('products')} />;
+      case 'stock-reconciliation': return <StockReconciliation />;
+      case 'purchase': return <Purchase navigate={navigate} />;
+      case 'stock-transfer': return <StockTransfer navigate={navigate} />;
+      case 'expenses': return <Expenses navigate={navigate} />;
+      case 'invoice': return <Invoice navigate={navigate} />;
+      case 'invoice-history': return <InvoiceHistory navigate={navigate} />;
+      default: return <Dashboard />;
+    }
+  };
+
   return (
-    <BrowserRouter>
-      <div className="app-container">
-        <Sidebar />
-        <div className="main-content">
-          <TopBar />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/invoice" element={<Invoice />} />
-            <Route path="/reports" element={<Reports />} />
-          </Routes>
+    <div className="app-container">
+      <Sidebar activePage={activePage} navigate={navigate} />
+      <div className="main-content">
+        <TopBar activePage={activePage} />
+        <div className="page-content">
+          {renderPage()}
         </div>
       </div>
     </BrowserRouter>
