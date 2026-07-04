@@ -1,8 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import '../App.css';
-
-import React, { useState } from 'react';
 import '../App.css';
 import customersLogo from '../icons/customers.png';
 import posLogo from '../icons/sales.png';
@@ -82,9 +78,9 @@ function Sidebar({ activePage, navigate }) {
     <div className="sidebar">
       <h2>BillSystem</h2>
       <ul>
-        <li><Link to="/">Dashboard</Link></li>
-        <li><Link to="/invoice">Invoices</Link></li>
-        <li><Link to="/reports">Reports</Link></li>
+        <li onClick={() => navigate('dashboard')}>Dashboard</li>
+        <li onClick={() => navigate('invoice')}>Invoices</li>
+        <li onClick={() => navigate('reports')}>Reports</li>
       </ul>
       <div className="sidebar-logo">
         <div className="logo-icon"> 
