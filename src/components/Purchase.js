@@ -302,8 +302,7 @@ function Purchase({ navigate }) {
                   <div style={{ fontSize: '14px', fontWeight: 700, color: '#1a1f2e' }}>Purchase Summary</div>
                   <div style={{ fontSize: '12px', color: '#6b7280' }}>Current stock and supplier preview</div>
                 </div>
-                <div style={{ width: '64px', height: '64px', background: '#f3f4f8', borderRadius: 16, display: 'grid', placeItems: 'center', fontSize: 28 }}>
-                  {/* {selectedProduct?.icon || '📦'} */}
+                <div>
                 </div>
               </div>
               <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '10px' }}>Supplier</div>
