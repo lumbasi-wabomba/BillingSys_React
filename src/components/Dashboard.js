@@ -1,21 +1,14 @@
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import React, { useState } from 'react';
 import '../App.css';
 
-// --- Simple inline SVG icons ---
-const IconBox = () => (
+// ============================================================
+// Icons (plain SVG line icons, no emojis)
+// ============================================================
+const IconCart = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-    <line x1="12" y1="22.08" x2="12" y2="12" />
-  </svg>
-);
-
-const IconReceipt = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M4 2h16v20l-3-2-3 2-3-2-3 2-3-2-1 2z" />
-    <line x1="8" y1="8" x2="16" y2="8" />
-    <line x1="8" y1="12" x2="16" y2="12" />
+    <circle cx="9" cy="21" r="1" />
+    <circle cx="20" cy="21" r="1" />
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
   </svg>
 );
 
@@ -26,90 +19,108 @@ const IconDollar = () => (
   </svg>
 );
 
-const IconReturn = () => (
+const IconTrendingUp = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="1 4 1 10 7 10" />
-    <path d="M3.51 15a9 9 0 1 0 .49-9.36L1 10" />
+    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+    <polyline points="17 6 23 6 23 12" />
   </svg>
 );
 
-const IconCart = () => (
+const IconCalendar = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="9" cy="21" r="1" />
-    <circle cx="20" cy="21" r="1" />
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
   </svg>
 );
 
-const IconCard = () => (
+const IconAlertTriangle = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="1" y="4" width="22" height="16" rx="2" />
-    <line x1="1" y1="10" x2="23" y2="10" />
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
   </svg>
 );
 
-const IconUsers = () => (
+const IconClock = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
   </svg>
 );
 
-const IconTruck = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="1" y="3" width="15" height="13" />
-    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-    <circle cx="5.5" cy="18.5" r="2.5" />
-    <circle cx="18.5" cy="18.5" r="2.5" />
+const IconUser = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
   </svg>
 );
 
-// --- Sample data (replace with real data from your backend later) ---
-const stats = [
-  { icon: <IconBox />, iconBg: '#f3e8ff', iconColor: '#9333ea', value: '1,240', change: '+12.5%', changeType: 'up', label: 'Total Products' },
-  { icon: <IconReceipt />, iconBg: '#dbeafe', iconColor: '#2563eb', value: '532', change: '+8.2%', changeType: 'up', label: 'Total Sales' },
-  { icon: <IconDollar />, iconBg: '#fef3c7', iconColor: '#d97706', value: '$25,360', change: '+15.4%', changeType: 'up', label: 'Total Revenue' },
-  { icon: <IconReturn />, iconBg: '#fee2e2', iconColor: '#dc2626', value: '18', change: '-3.1%', changeType: 'down', label: 'Sales Returns' },
-  { icon: <IconCart />, iconBg: '#dcfce7', iconColor: '#16a34a', value: '210', change: '+6.7%', changeType: 'up', label: 'Purchases' },
-  { icon: <IconCard />, iconBg: '#ffe4e6', iconColor: '#e11d48', value: '$4,120', change: '+2.3%', changeType: 'up', label: 'Expenses' },
-  { icon: <IconUsers />, iconBg: '#e0f2fe', iconColor: '#0284c7', value: '312', change: '+4.5%', changeType: 'up', label: 'Customers' },
-  { icon: <IconTruck />, iconBg: '#ede9fe', iconColor: '#7c3aed', value: '48', change: '+1.2%', changeType: 'up', label: 'Suppliers' },
+// ============================================================
+// Sample data (swap these for real data once backend is wired up)
+// ============================================================
+
+// Section 1 — top overview cards (Total Orders, Total Sales, Average Value, Reservations)
+const overviewStats = [
+  { icon: <IconCart />, iconBg: '#ede9fe', iconColor: '#7c3aed', value: '6,986', change: '+12.5%', changeType: 'up', label: 'Total Orders' },
+  { icon: <IconDollar />, iconBg: '#dbeafe', iconColor: '#2563eb', value: 'KSh 7,516', change: '+12.5%', changeType: 'up', label: 'Total Sales' },
+  { icon: <IconTrendingUp />, iconBg: '#fee2e2', iconColor: '#dc2626', value: 'KSh 25.36', change: '-8.5%', changeType: 'down', label: 'Average Value' },
+  { icon: <IconCalendar />, iconBg: '#dcfce7', iconColor: '#16a34a', value: '496', change: '+12.5%', changeType: 'up', label: 'Reservations' },
 ];
 
-const revenueData = [
-  { day: 'Mon', revenue: 3200 },
-  { day: 'Tue', revenue: 2100 },
-  { day: 'Wed', revenue: 3900 },
-  { day: 'Thu', revenue: 2800 },
-  { day: 'Fri', revenue: 4100 },
-  { day: 'Sat', revenue: 3600 },
-  { day: 'Sun', revenue: 3000 },
+// Section 1b — operational alerts (Low Stock, Pending Orders)
+const alertStats = [
+  { icon: <IconAlertTriangle />, iconBg: '#fef3c7', iconColor: '#d97706', value: '14', change: '+3', changeType: 'down', label: 'Low Stock Items' },
+  { icon: <IconClock />, iconBg: '#e0e7ff', iconColor: '#4f46e5', value: '9', change: 'Pending', changeType: 'down', label: 'Pending Orders' },
 ];
 
-const topProducts = [
-  { rank: 1, name: 'Wireless Mouse', count: 520, color: '#3b82f6' },
-  { rank: 2, name: 'USB-C Cable', count: 340, color: '#f59e0b' },
-  { rank: 3, name: 'Bluetooth Speaker', count: 275, color: '#10b981' },
-  { rank: 4, name: 'Laptop Stand', count: 160, color: '#8b5cf6' },
+// Section 2 — Top Selling Items (with images)
+const topSellingItems = [
+  { name: 'Wireless Mouse', unitsSold: 520, image: '/assets/products/mouse.png' },
+  { name: 'Bluetooth Speaker', unitsSold: 340, image: '/assets/products/bluetoothspeaker.png' },
+  { name: 'Laptop Stand', unitsSold: 275, image: '/assets/products/lapstand.png' },
+  { name: 'USB-C Cable', unitsSold: 160, image: '/assets/products/usbcable.png' },
 ];
 
-// --- Stat card component ---
+// Section 3 — Category statistics
+const categoryStats = [
+  { category: 'Electronics', count: 420, color: '#3b82f6' },
+  { category: 'Accessories', count: 310, color: '#f59e0b' },
+  { category: 'Software', count: 150, color: '#10b981' },
+  { category: 'Furniture', count: 90, color: '#8b5cf6' },
+];
+
+// Section 4 — Staff / user activity (selectable)
+const staffActivity = [
+  { name: 'Baraka', ordersHandled: 18, salesMade: 'KSh 24,500' },
+  { name: 'Evelyn', ordersHandled: 12, salesMade: 'KSh 15,200' },
+  { name: 'Lumbasi', ordersHandled: 9, salesMade: 'KSh 11,800' },
+];
+
+// Section 5 — Trending products grid (9 items)
+const trendingProducts = [
+  { name: 'Wireless Mouse', image: '/assets/products/mouse.png' },
+  { name: 'Bluetooth Speaker', image: '/assets/products/bluetoothspeaker.png' },
+  { name: 'Laptop Stand', image: '/assets/products/lapstand.png' },
+  { name: 'USB-C Cable', image: '/assets/products/usbcable.png' },
+  { name: 'Mechanical Keyboard', image: '/assets/products/keyboard.png' },
+  { name: 'Phone Charger', image: '/assets/products/charger.png' },
+  { name: 'HDMI Cable', image: '/assets/products/hdmi.png' },
+  { name: 'Power Bank', image: '/assets/products/powerbank.png' },
+  { name: 'Webcam', image: '/assets/products/webcam.png' },
+];
+
+// ============================================================
+// Reusable components
+// ============================================================
+
 function StatCard({ icon, iconBg, iconColor, value, change, changeType, label }) {
   return (
-    <div style={{
-      background: '#fff',
-      borderRadius: 16,
-      padding: 20,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-    }}>
+    <div style={styles.card}>
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>{value}</span>
+          <span style={{ fontSize: 22, fontWeight: 700, color: '#111827' }}>{value}</span>
           <span style={{
             fontSize: 12,
             fontWeight: 600,
@@ -119,79 +130,187 @@ function StatCard({ icon, iconBg, iconColor, value, change, changeType, label })
             color: changeType === 'up' ? '#16a34a' : '#dc2626',
           }}>{change}</span>
         </div>
-        <div style={{ color: '#6b7280', marginTop: 6, fontSize: 14 }}>{label}</div>
+        <div style={{ color: '#6b7280', marginTop: 6, fontSize: 13 }}>{label}</div>
       </div>
       <div style={{
-        width: 44,
-        height: 44,
-        borderRadius: '50%',
-        background: iconBg,
-        color: iconColor,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
+        width: 42, height: 42, borderRadius: '50%',
+        background: iconBg, color: iconColor,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
       }}>{icon}</div>
     </div>
   );
 }
 
-// --- Top product row with progress bar ---
-function TopItemRow({ rank, name, count, max, color }) {
+function ProductImageCard({ name, image, subtitle }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', margin: '14px 0' }}>
-      <span style={{ width: 30, fontWeight: 600, color: '#6b7280', fontSize: 13 }}>#{rank}</span>
-      <span style={{ flex: 1, fontSize: 14 }}>{name}</span>
-      <div style={{ width: 100, height: 6, background: '#f1f5f9', borderRadius: 3, margin: '0 12px' }}>
+    <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: styles.shadow, textAlign: 'center' }}>
+      {imgError || !image ? (
         <div style={{
-          width: `${(count / max) * 100}%`,
-          height: '100%',
-          background: color,
-          borderRadius: 3,
-        }} />
+          width: '100%', height: 110, background: '#f3f4f6',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af',
+        }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+        </div>
+      ) : (
+        <img
+          src={image}
+          alt={name}
+          onError={() => setImgError(true)}
+          style={{ width: '100%', height: 110, objectFit: 'cover' }}
+        />
+      )}
+      <div style={{ padding: '10px 8px' }}>
+        <div style={{ fontSize: 14, fontWeight: 500, color: '#374151' }}>{name}</div>
+        {subtitle && <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{subtitle}</div>}
       </div>
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{count}</span>
     </div>
   );
 }
 
+function CategoryBar({ category, count, max, color }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', margin: '12px 0' }}>
+      <span style={{ width: 110, fontSize: 14, color: '#374151' }}>{category}</span>
+      <div style={{ flex: 1, height: 8, background: '#f1f5f9', borderRadius: 4, margin: '0 12px' }}>
+        <div style={{ width: `${(count / max) * 100}%`, height: '100%', background: color, borderRadius: 4 }} />
+      </div>
+      <span style={{ fontSize: 13, fontWeight: 600, color: '#374151', width: 40, textAlign: 'right' }}>{count}</span>
+    </div>
+  );
+}
+
+function StaffCard({ name, ordersHandled, salesMade, isSelected, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background: isSelected ? '#eef2ff' : '#fff',
+        border: isSelected ? '2px solid #6366f1' : '2px solid transparent',
+        borderRadius: 12,
+        padding: 16,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        cursor: 'pointer',
+        boxShadow: styles.shadow,
+      }}
+    >
+      <div style={{
+        width: 40, height: 40, borderRadius: '50%', background: '#e0e7ff', color: '#4f46e5',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      }}>
+        <IconUser />
+      </div>
+      <div>
+        <div style={{ fontWeight: 600, color: '#111827' }}>{name}</div>
+        <div style={{ fontSize: 12, color: '#6b7280' }}>{ordersHandled} active orders</div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Shared styles
+// ============================================================
+const styles = {
+  shadow: '0 1px 3px rgba(0,0,0,0.08)',
+  card: {
+    background: '#fff',
+    borderRadius: 16,
+    padding: 18,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+  },
+  section: {
+    background: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+    marginBottom: 24,
+  },
+};
+
+// ============================================================
+// Main Dashboard component
+// ============================================================
 function Dashboard() {
-  const maxCount = Math.max(...topProducts.map(p => p.count));
+  const [selectedStaff, setSelectedStaff] = useState(staffActivity[0].name);
+  const maxCategoryCount = Math.max(...categoryStats.map(c => c.count));
+  const activeStaffDetail = staffActivity.find(s => s.name === selectedStaff);
 
   return (
     <div style={{ padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2 style={{ margin: 0 }}>Dashboard</h2>
+      <h2 style={{ margin: '0 0 20px 0' }}>Dashboard</h2>
+
+      {/* ---------- Section 1: Overview stat cards ---------- */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 16 }}>
+        {overviewStats.map((s, i) => <StatCard key={i} {...s} />)}
       </div>
 
-      {/* Stat cards grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: 16,
-        marginBottom: 24,
-      }}>
-        {stats.map((s, i) => <StatCard key={i} {...s} />)}
+      {/* ---------- Section 1b: Low stock / pending orders ---------- */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 24 }}>
+        {alertStats.map((s, i) => <StatCard key={i} {...s} />)}
       </div>
 
-      {/* Chart + Top items */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
-        <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-          <h3 style={{ marginTop: 0 }}>Total Revenue (Weekly)</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={revenueData}>
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+      {/* ---------- Section 2: Top Selling Items ---------- */}
+      <div style={styles.section}>
+        <h3 style={{ marginTop: 0 }}>Top Selling Items</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+          {topSellingItems.map((p, i) => (
+            <ProductImageCard key={i} name={p.name} image={p.image} subtitle={`${p.unitsSold} sold`} />
+          ))}
+        </div>
+      </div>
+
+      {/* ---------- Section 3: Category Statistics ---------- */}
+      <div style={styles.section}>
+        <h3 style={{ marginTop: 0 }}>Category Statistics</h3>
+        {categoryStats.map((c, i) => (
+          <CategoryBar key={i} {...c} max={maxCategoryCount} />
+        ))}
+      </div>
+
+      {/* ---------- Section 4: Active Orders / Staff Activity ---------- */}
+      <div style={styles.section}>
+        <h3 style={{ marginTop: 0 }}>Active Orders by Staff</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 20 }}>
+          {staffActivity.map((s, i) => (
+            <StaffCard
+              key={i}
+              {...s}
+              isSelected={selectedStaff === s.name}
+              onClick={() => setSelectedStaff(s.name)}
+            />
+          ))}
         </div>
 
-        <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-          <h3 style={{ marginTop: 0 }}>Top Selling Products</h3>
-          {topProducts.map(p => (
-            <TopItemRow key={p.rank} {...p} max={maxCount} />
+        {activeStaffDetail && (
+          <div style={{ background: '#f9fafb', borderRadius: 12, padding: 16 }}>
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>{activeStaffDetail.name}'s Summary</div>
+            <div style={{ fontSize: 14, color: '#374151' }}>
+              Active Orders: <strong>{activeStaffDetail.ordersHandled}</strong>
+            </div>
+            <div style={{ fontSize: 14, color: '#374151' }}>
+              Sales Made: <strong>{activeStaffDetail.salesMade}</strong>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ---------- Section 5: Trending Products (grid of 9) ---------- */}
+      <div style={styles.section}>
+        <h3 style={{ marginTop: 0 }}>Trending Products</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+          {trendingProducts.map((p, i) => (
+            <ProductImageCard key={i} name={p.name} image={p.image} />
           ))}
         </div>
       </div>
