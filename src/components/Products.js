@@ -2,16 +2,14 @@ import React, { useState } from 'react';
 import '../App.css';
 
 export const products = [
-  { id: 1, name: 'Apple iPhone 15 Pro Max', sku: 'PHN-001', category: 'Electronics', brand: 'Apple', unit: 'Piece', price: '$1,299', purchasePrice: '$950', qty: 45, minQty: 10, warehouse: 'Main Store', status: 'Active', icon: '📱' },
-  { id: 2, name: 'Dell XPS 15 Laptop (32GB)', sku: 'LPT-042', category: 'Electronics', brand: 'Dell', unit: 'Piece', price: '$2,199', purchasePrice: '$1,700', qty: 12, minQty: 5, warehouse: 'Main Store', status: 'Active', icon: '💻' },
-  { id: 3, name: 'Samsung 55" QLED TV', sku: 'TV-007', category: 'Electronics', brand: 'Samsung', unit: 'Piece', price: '$1,099', purchasePrice: '$780', qty: 8, minQty: 5, warehouse: 'Branch A', status: 'Active', icon: '📺' },
-  { id: 4, name: 'Sony WH-1000XM5 Headphones', sku: 'AUD-022', category: 'Electronics', brand: 'Sony', unit: 'Piece', price: '$399', purchasePrice: '$280', qty: 32, minQty: 10, warehouse: 'Main Store', status: 'Active', icon: '🎧' },
-  { id: 5, name: 'Logitech MX Master 3 Mouse', sku: 'ACC-089', category: 'Accessories', brand: 'Logitech', unit: 'Piece', price: '$129', purchasePrice: '$85', qty: 3, minQty: 15, warehouse: 'Main Store', status: 'Low Stock', icon: '🖱️' },
-  { id: 6, name: 'Apple Watch Series 9', sku: 'WTC-015', category: 'Electronics', brand: 'Apple', unit: 'Piece', price: '$699', purchasePrice: '$520', qty: 22, minQty: 8, warehouse: 'Branch B', status: 'Active', icon: '⌚' },
-  { id: 7, name: 'Samsung Galaxy Tab S9', sku: 'TAB-031', category: 'Electronics', brand: 'Samsung', unit: 'Piece', price: '$849', purchasePrice: '$620', qty: 0, minQty: 5, warehouse: 'Main Store', status: 'Out of Stock', icon: '📱' },
-  { id: 8, name: 'Corsair Vengeance RAM 32GB', sku: 'RAM-009', category: 'Components', brand: 'Corsair', unit: 'Piece', price: '$179', purchasePrice: '$120', qty: 18, minQty: 10, warehouse: 'Main Store', status: 'Active', icon: '🖥️' },
-  { id: 9, name: 'Western Digital 2TB SSD', sku: 'STO-044', category: 'Components', brand: 'WD', unit: 'Piece', price: '$249', purchasePrice: '$180', qty: 25, minQty: 10, warehouse: 'Main Store', status: 'Active', icon: '💾' },
-  { id: 10, name: 'Canon EOS R6 Mark II', sku: 'CAM-006', category: 'Cameras', brand: 'Canon', unit: 'Piece', price: '$2,499', purchasePrice: '$1,950', qty: 6, minQty: 3, warehouse: 'Branch A', status: 'Active', icon: '📷' },
+  { id: 1, name: 'Wireless Mouse', sku: 'ACC-101', category: 'Accessories', brand: 'Logitech', unit: 'Piece', price: '$19.99', purchasePrice: '$12.00', qty: 85, minQty: 20, warehouse: 'Main Store', status: 'Active', sold: 520, icon: '🖱️' },
+  { id: 2, name: 'Bluetooth Speaker', sku: 'AUD-102', category: 'Electronics', brand: 'JBL', unit: 'Piece', price: '$49.99', purchasePrice: '$32.00', qty: 60, minQty: 15, warehouse: 'Main Store', status: 'Active', sold: 340, icon: '🔊' },
+  { id: 3, name: 'Laptop Stand', sku: 'ACC-103', category: 'Accessories', brand: 'Generic', unit: 'Piece', price: '$24.99', purchasePrice: '$14.00', qty: 40, minQty: 10, warehouse: 'Branch A', status: 'Active', sold: 275, icon: '💻' },
+  { id: 4, name: 'USB-C Cable', sku: 'ACC-104', category: 'Accessories', brand: 'Anker', unit: 'Piece', price: '$9.99', purchasePrice: '$4.50', qty: 150, minQty: 30, warehouse: 'Main Store', status: 'Active', sold: 160, icon: '🔌' },
+  { id: 5, name: 'Mechanical Keyboard', sku: 'ACC-105', category: 'Electronics', brand: 'Redragon', unit: 'Piece', price: '$59.99', purchasePrice: '$38.00', qty: 25, minQty: 10, warehouse: 'Main Store', status: 'Active', sold: 95, icon: '⌨️' },
+  { id: 6, name: 'Phone Charger', sku: 'ACC-106', category: 'Accessories', brand: 'Anker', unit: 'Piece', price: '$14.99', purchasePrice: '$7.00', qty: 5, minQty: 20, warehouse: 'Main Store', status: 'Low Stock', sold: 80, icon: '🔋' },
+  { id: 7, name: 'HDMI Cable', sku: 'ACC-107', category: 'Accessories', brand: 'Generic', unit: 'Piece', price: '$8.99', purchasePrice: '$4.00', qty: 0, minQty: 15, warehouse: 'Main Store', status: 'Out of Stock', sold: 65, icon: '🔗' },
+  { id: 8, name: 'Power Bank', sku: 'ACC-108', category: 'Electronics', brand: 'Anker', unit: 'Piece', price: '$29.99', purchasePrice: '$18.00', qty: 30, minQty: 10, warehouse: 'Branch B', status: 'Active', sold: 110, icon: '🔋' },
 ];
 
 const stockColor = (s) => s === 'Active' ? 'success' : s === 'Low Stock' ? 'warning' : 'danger';
@@ -37,9 +35,7 @@ export default function Products({ onProductClick }) {
           { label: 'Out of Stock', value: products.filter(p => p.status === 'Out of Stock').length, color: 'red' },
         ].map((s, i) => (
           <div className="stat-card" key={i}>
-            <div className="stat-card-header">
-              {/* <div className={`stat-icon ${s.color}`}>{s.icon}</div> */}
-            </div>
+            <div className="stat-card-header"></div>
             <div className="stat-value">{s.value}</div>
             <div className="stat-label">{s.label}</div>
           </div>

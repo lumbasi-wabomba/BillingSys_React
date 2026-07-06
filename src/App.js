@@ -11,6 +11,12 @@ import InvoiceHistory from "./components/InvoiceHistory";
 import StockTransfer from "./components/StockTransfer";
 import Purchase from "./components/Purchase";
 import Expenses from "./components/Expenses";
+import Sales from "./components/Sales";
+import SalesReturns from "./components/SalesReturns";
+import POS from "./components/POS";
+import Customers from "./components/Customers";
+import Suppliers from "./components/Suppliers";
+import Users from "./components/Users";
 import './App.css';
 
 function App() {
@@ -35,6 +41,12 @@ function App() {
       case 'expenses': return <Expenses navigate={navigate} />;
       case 'invoice': return <Invoice navigate={navigate} />;
       case 'invoice-history': return <InvoiceHistory navigate={navigate} />;
+      case 'sales': return <Sales />;
+      case 'returns': return <SalesReturns />;
+      case 'pos': return <POS />;
+      case 'customers': return <Customers />;
+      case 'suppliers': return <Suppliers />;
+      case 'users': return <Users />;
       default: return <Dashboard />;
     }
   };
