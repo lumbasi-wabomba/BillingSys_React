@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import '../App.css';
 
 const initItems = [
-  { id: 1, sku: 'PHN-001', name: 'Apple iPhone 15 Pro Max', category: 'Electronics', systemQty: 45, countedQty: '', icon: '📱', warehouse: 'Main Store', unit: 'Piece', costPrice: 950 },
-  { id: 2, sku: 'LPT-042', name: 'Dell XPS 15 Laptop (32GB)', category: 'Electronics', systemQty: 12, countedQty: '', icon: '💻', warehouse: 'Main Store', unit: 'Piece', costPrice: 1700 },
-  { id: 3, sku: 'TV-007', name: 'Samsung 55" QLED TV', category: 'Electronics', systemQty: 8, countedQty: '', icon: '📺', warehouse: 'Branch A', unit: 'Piece', costPrice: 780 },
-  { id: 4, sku: 'AUD-022', name: 'Sony WH-1000XM5 Headphones', category: 'Electronics', systemQty: 32, countedQty: '', icon: '🎧', warehouse: 'Main Store', unit: 'Piece', costPrice: 280 },
-  { id: 5, sku: 'ACC-089', name: 'Logitech MX Master 3 Mouse', category: 'Accessories', systemQty: 3, countedQty: '', icon: '🖱️', warehouse: 'Main Store', unit: 'Piece', costPrice: 85 },
-  { id: 6, sku: 'WTC-015', name: 'Apple Watch Series 9', category: 'Electronics', systemQty: 22, countedQty: '', icon: '⌚', warehouse: 'Branch B', unit: 'Piece', costPrice: 520 },
-  { id: 7, sku: 'RAM-009', name: 'Corsair Vengeance RAM 32GB', category: 'Components', systemQty: 18, countedQty: '', icon: '🖥️', warehouse: 'Main Store', unit: 'Piece', costPrice: 120 },
-  { id: 8, sku: 'STO-044', name: 'Western Digital 2TB SSD', category: 'Components', systemQty: 25, countedQty: '', icon: '💾', warehouse: 'Main Store', unit: 'Piece', costPrice: 180 },
+  { id: 1, sku: 'ACC-101', name: 'Wireless Mouse', category: 'Accessories', systemQty: 85, countedQty: '', icon: '🖱️', warehouse: 'Main Store', unit: 'Piece', costPrice: 12.00 },
+  { id: 2, sku: 'AUD-102', name: 'Bluetooth Speaker', category: 'Electronics', systemQty: 60, countedQty: '', icon: '🔊', warehouse: 'Main Store', unit: 'Piece', costPrice: 32.00 },
+  { id: 3, sku: 'ACC-103', name: 'Laptop Stand', category: 'Accessories', systemQty: 40, countedQty: '', icon: '💻', warehouse: 'Branch A', unit: 'Piece', costPrice: 14.00 },
+  { id: 4, sku: 'ACC-104', name: 'USB-C Cable', category: 'Accessories', systemQty: 150, countedQty: '', icon: '🔌', warehouse: 'Main Store', unit: 'Piece', costPrice: 4.50 },
+  { id: 5, sku: 'ACC-105', name: 'Mechanical Keyboard', category: 'Electronics', systemQty: 25, countedQty: '', icon: '⌨️', warehouse: 'Main Store', unit: 'Piece', costPrice: 38.00 },
+  { id: 6, sku: 'ACC-106', name: 'Phone Charger', category: 'Accessories', systemQty: 5, countedQty: '', icon: '🔋', warehouse: 'Main Store', unit: 'Piece', costPrice: 7.00 },
+  { id: 7, sku: 'ACC-107', name: 'HDMI Cable', category: 'Accessories', systemQty: 0, countedQty: '', icon: '🔗', warehouse: 'Main Store', unit: 'Piece', costPrice: 4.00 },
+  { id: 8, sku: 'ACC-108', name: 'Power Bank', category: 'Electronics', systemQty: 30, countedQty: '', icon: '🔋', warehouse: 'Branch B', unit: 'Piece', costPrice: 18.00 },
 ];
 
 export default function StockReconciliation() {

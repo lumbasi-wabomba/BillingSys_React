@@ -11,12 +11,12 @@ const reportStats = [
 ];
 
 const salesData = [
-  { ref: 'SR-2026-001', date: 'Jun 29, 2026', customer: 'Alice Johnson', warehouse: 'Main Store', biller: 'Wayne M.', grandTotal: '$2,450', paid: '$2,450', due: '$0.00', status: 'Completed', payStatus: 'Paid' },
+  { ref: 'SR-2026-001', date: 'Jun 29, 2026', customer: 'Wayne Baraka', warehouse: 'Main Store', biller: 'Wayne M.', grandTotal: '$2,450', paid: '$2,450', due: '$0.00', status: 'Completed', payStatus: 'Paid' },
   { ref: 'SR-2026-002', date: 'Jun 28, 2026', customer: 'Bob Smith', warehouse: 'Branch A', biller: 'Sarah K.', grandTotal: '$890', paid: '$500', due: '$390', status: 'Completed', payStatus: 'Partial' },
   { ref: 'SR-2026-003', date: 'Jun 27, 2026', customer: 'Carol White', warehouse: 'Main Store', biller: 'Wayne M.', grandTotal: '$3,200', paid: '$3,200', due: '$0.00', status: 'Processing', payStatus: 'Paid' },
-  { ref: 'SR-2026-004', date: 'Jun 26, 2026', customer: 'David Green', warehouse: 'Branch B', biller: 'Tom P.', grandTotal: '$650', paid: '$0', due: '$650', status: 'Pending', payStatus: 'Unpaid' },
+  { ref: 'SR-2026-004', date: 'Jun 26, 2026', customer: 'Evaline Mwangi', warehouse: 'Branch B', biller: 'Tom P.', grandTotal: '$650', paid: '$0', due: '$650', status: 'Pending', payStatus: 'Unpaid' },
   { ref: 'SR-2026-005', date: 'Jun 25, 2026', customer: 'Eva Brown', warehouse: 'Main Store', biller: 'Wayne M.', grandTotal: '$1,100', paid: '$1,100', due: '$0.00', status: 'Completed', payStatus: 'Paid' },
-  { ref: 'SR-2026-006', date: 'Jun 25, 2026', customer: 'Frank Lee', warehouse: 'Branch A', biller: 'Sarah K.', grandTotal: '$420', paid: '$420', due: '$0.00', status: 'Completed', payStatus: 'Paid' },
+  { ref: 'SR-2026-006', date: 'Jun 25, 2026', customer: 'Lumbasi Kefa', warehouse: 'Branch A', biller: 'Sarah K.', grandTotal: '$420', paid: '$420', due: '$0.00', status: 'Completed', payStatus: 'Paid' },
   { ref: 'SR-2026-007', date: 'Jun 24, 2026', customer: 'Grace Kim', warehouse: 'Main Store', biller: 'Tom P.', grandTotal: '$5,600', paid: '$2,800', due: '$2,800', status: 'Completed', payStatus: 'Partial' },
 ];
 
