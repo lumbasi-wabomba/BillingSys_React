@@ -2,9 +2,7 @@ name: Build Docker Image
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches: [main]
 
 jobs:
   build:
@@ -13,19 +11,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug
+      - name: Show repository
         run: |
-          echo "Current directory:"
           pwd
-          echo
-          echo "Files in current directory:"
-          ls -la
-          echo
-          echo "Find all Dockerfiles:"
-          find . -name "Dockerfile"
-          echo
-          echo "Git status:"
-          git status
+          ls -lah
+          echo "----- Dockerfiles -----"
+          find . -name "Dockerfile" -exec ls -lh {} \;
+          echo "----- Root Dockerfile -----"
+          cat ./Dockerfile
 
-      - name: Build Docker image
-        run: docker build . -f Dockerfile -t my-image-name:latest
+      - name: Build image
+        run: |
+          docker build \
+            --progress=plain \
+            -f ./Dockerfile \
+            .
