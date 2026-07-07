@@ -20,7 +20,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/billingsys-react:latest .
+          docker build \
+            --build-arg DOCKER_ENV_FILE="${{ secrets.DOCKER_ENV_FILE }}" \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/billingsys-react:latest .
 
       - name: Push Docker image
         run: |
