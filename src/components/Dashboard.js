@@ -1,202 +1,253 @@
-import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import '../App.css';
+import React, { useState } from "react";
+import {
+  ShoppingCart,
+  DollarSign,
+  TrendingUp,
+  Calendar,
+  AlertTriangle,
+  Clock,
+  User,
+} from "lucide-react";
 
-// --- Simple inline SVG icons ---
-const IconBox = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-    <line x1="12" y1="22.08" x2="12" y2="12" />
-  </svg>
-);
+// ---- Mock data (swap these for real data from dbConn.js / your API) ----
 
-const IconReceipt = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M4 2h16v20l-3-2-3 2-3-2-3 2-3-2-1 2z" />
-    <line x1="8" y1="8" x2="16" y2="8" />
-    <line x1="8" y1="12" x2="16" y2="12" />
-  </svg>
-);
-
-const IconDollar = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <line x1="12" y1="1" x2="12" y2="23" />
-    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-  </svg>
-);
-
-const IconReturn = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="1 4 1 10 7 10" />
-    <path d="M3.51 15a9 9 0 1 0 .49-9.36L1 10" />
-  </svg>
-);
-
-const IconCart = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="9" cy="21" r="1" />
-    <circle cx="20" cy="21" r="1" />
-    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-  </svg>
-);
-
-const IconCard = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="1" y="4" width="22" height="16" rx="2" />
-    <line x1="1" y1="10" x2="23" y2="10" />
-  </svg>
-);
-
-const IconUsers = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
-
-const IconTruck = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="1" y="3" width="15" height="13" />
-    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-    <circle cx="5.5" cy="18.5" r="2.5" />
-    <circle cx="18.5" cy="18.5" r="2.5" />
-  </svg>
-);
-
-// --- Sample data (replace with real data from your backend later) ---
-const stats = [
-  { icon: <IconBox />, iconBg: '#f3e8ff', iconColor: '#9333ea', value: '1,240', change: '+12.5%', changeType: 'up', label: 'Total Products' },
-  { icon: <IconReceipt />, iconBg: '#dbeafe', iconColor: '#2563eb', value: '532', change: '+8.2%', changeType: 'up', label: 'Total Sales' },
-  { icon: <IconDollar />, iconBg: '#fef3c7', iconColor: '#d97706', value: '$25,360', change: '+15.4%', changeType: 'up', label: 'Total Revenue' },
-  { icon: <IconReturn />, iconBg: '#fee2e2', iconColor: '#dc2626', value: '18', change: '-3.1%', changeType: 'down', label: 'Sales Returns' },
-  { icon: <IconCart />, iconBg: '#dcfce7', iconColor: '#16a34a', value: '210', change: '+6.7%', changeType: 'up', label: 'Purchases' },
-  { icon: <IconCard />, iconBg: '#ffe4e6', iconColor: '#e11d48', value: '$4,120', change: '+2.3%', changeType: 'up', label: 'Expenses' },
-  { icon: <IconUsers />, iconBg: '#e0f2fe', iconColor: '#0284c7', value: '312', change: '+4.5%', changeType: 'up', label: 'Customers' },
-  { icon: <IconTruck />, iconBg: '#ede9fe', iconColor: '#7c3aed', value: '48', change: '+1.2%', changeType: 'up', label: 'Suppliers' },
+const statCards = [
+  {
+    id: "orders",
+    label: "Total Orders",
+    value: "6,986",
+    delta: "+12.5%",
+    deltaTone: "positive",
+    icon: ShoppingCart,
+    iconBg: "#EDE9FE",
+    iconColor: "#7C3AED",
+  },
+  {
+    id: "sales",
+    label: "Total Sales",
+    value: "KSh 7,516",
+    delta: "+12.5%",
+    deltaTone: "positive",
+    icon: DollarSign,
+    iconBg: "#DBEAFE",
+    iconColor: "#2563EB",
+  },
+  {
+    id: "avg",
+    label: "Average Value",
+    value: "KSh 25.36",
+    delta: "-8.5%",
+    deltaTone: "negative",
+    icon: TrendingUp,
+    iconBg: "#FEE2E2",
+    iconColor: "#DC2626",
+  },
+  {
+    id: "reservations",
+    label: "Reservations",
+    value: "496",
+    delta: "+12.5%",
+    deltaTone: "positive",
+    icon: Calendar,
+    iconBg: "#D1FAE5",
+    iconColor: "#059669",
+  },
 ];
 
-const revenueData = [
-  { day: 'Mon', revenue: 3200 },
-  { day: 'Tue', revenue: 2100 },
-  { day: 'Wed', revenue: 3900 },
-  { day: 'Thu', revenue: 2800 },
-  { day: 'Fri', revenue: 4100 },
-  { day: 'Sat', revenue: 3600 },
-  { day: 'Sun', revenue: 3000 },
+const secondaryCards = [
+  {
+    id: "lowstock",
+    label: "Low Stock Items",
+    value: "14",
+    delta: "+3",
+    deltaTone: "negative",
+    icon: AlertTriangle,
+    iconBg: "#FEF3C7",
+    iconColor: "#D97706",
+  },
+  {
+    id: "pending",
+    label: "Pending Orders",
+    value: "9",
+    delta: "Pending",
+    deltaTone: "negative",
+    icon: Clock,
+    iconBg: "#E0E7FF",
+    iconColor: "#4F46E5",
+  },
 ];
 
-const topProducts = [
-  { rank: 1, name: 'Wireless Mouse', count: 520, color: '#3b82f6' },
-  { rank: 2, name: 'USB-C Cable', count: 340, color: '#f59e0b' },
-  { rank: 3, name: 'Bluetooth Speaker', count: 275, color: '#10b981' },
-  { rank: 4, name: 'Laptop Stand', count: 160, color: '#8b5cf6' },
+const topSellingItems = [
+  { name: "Wireless Mouse", sold: 520, image: "/assets/products/mouse.png" },
+  {
+    name: "Bluetooth Speaker",
+    sold: 340,
+    image: "/assets/products/bluetoothspeaker.png",
+  },
+  { name: "Laptop Stand", sold: 275, image: "/assets/products/lapstand.png" },
+  { name: "USB-C Cable", sold: 160, image: "/assets/products/usbcable.png" },
 ];
 
-// --- Stat card component ---
-function StatCard({ icon, iconBg, iconColor, value, change, changeType, label }) {
+const trendingProducts = [
+  { name: "Wireless Mouse", image: "/assets/products/mouse.png" },
+  { name: "Bluetooth Speaker", image: "/assets/products/bluetoothspeaker.png" },
+  { name: "Laptop Stand", image: "/assets/products/lapstand.png" },
+  { name: "USB-C Cable", image: "/assets/products/usbcable.png" },
+  { name: "Mechanical Keyboard", image: "/assets/products/keyboard.png" },
+  { name: "Phone Charger", image: "/assets/products/charger.png" },
+  { name: "HDMI Cable", image: "/assets/products/hdmi.png" },
+  { name: "Power Bank", image: "/assets/products/powerbank.png" },
+  { name: "Webcam", image: "/assets/products/webcam.png" },
+];
+
+const categoryStats = [
+  { name: "Electronics", value: 420, color: "#3B82F6" },
+  { name: "Accessories", value: 310, color: "#F59E0B" },
+  { name: "Software", value: 150, color: "#10B981" },
+  { name: "Furniture", value: 90, color: "#8B5CF6" },
+];
+
+const staffActivity = [
+  { name: "Baraka", activeOrders: 18, salesMade: "KSh 24,500" },
+  { name: "Evelyn", activeOrders: 12, salesMade: "KSh 15,200" },
+  { name: "Lumbasi", activeOrders: 9, salesMade: "KSh 11,800" },
+];
+
+// ---- Component ----
+
+export default function Dashboard() {
+  const [selectedStaff, setSelectedStaff] = useState(staffActivity[0].name);
+  const maxCategoryValue = Math.max(...categoryStats.map((c) => c.value));
+  const activeStaff = staffActivity.find((s) => s.name === selectedStaff);
+
   return (
-    <div style={{
-      background: '#fff',
-      borderRadius: 16,
-      padding: 20,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-    }}>
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>{value}</span>
-          <span style={{
-            fontSize: 12,
-            fontWeight: 600,
-            padding: '2px 8px',
-            borderRadius: 12,
-            background: changeType === 'up' ? '#dcfce7' : '#fee2e2',
-            color: changeType === 'up' ? '#16a34a' : '#dc2626',
-          }}>{change}</span>
+    <div className="dashboard">
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">Dashboard</h1>
+          <div className="breadcrumb">Home / Dashboard</div>
         </div>
-        <div style={{ color: '#6b7280', marginTop: 6, fontSize: 14 }}>{label}</div>
-      </div>
-      <div style={{
-        width: 44,
-        height: 44,
-        borderRadius: '50%',
-        background: iconBg,
-        color: iconColor,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}>{icon}</div>
-    </div>
-  );
-}
-
-// --- Top product row with progress bar ---
-function TopItemRow({ rank, name, count, max, color }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', margin: '14px 0' }}>
-      <span style={{ width: 30, fontWeight: 600, color: '#6b7280', fontSize: 13 }}>#{rank}</span>
-      <span style={{ flex: 1, fontSize: 14 }}>{name}</span>
-      <div style={{ width: 100, height: 6, background: '#f1f5f9', borderRadius: 3, margin: '0 12px' }}>
-        <div style={{
-          width: `${(count / max) * 100}%`,
-          height: '100%',
-          background: color,
-          borderRadius: 3,
-        }} />
-      </div>
-      <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{count}</span>
-    </div>
-  );
-}
-
-function Dashboard() {
-  const maxCount = Math.max(...topProducts.map(p => p.count));
-
-  return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2 style={{ margin: 0 }}>Dashboard</h2>
+        <div className="welcome-text">Welcome, Wayne</div>
       </div>
 
-      {/* Stat cards grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: 16,
-        marginBottom: 24,
-      }}>
-        {stats.map((s, i) => <StatCard key={i} {...s} />)}
+      {/* Primary stat cards */}
+      <div className="stat-grid">
+        {statCards.map((card) => (
+          <StatCard key={card.id} {...card} />
+        ))}
       </div>
 
-      {/* Chart + Top items */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
-        <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-          <h3 style={{ marginTop: 0 }}>Total Revenue (Weekly)</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={revenueData}>
-              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      {/* Secondary stat cards (Low Stock / Pending) */}
+      <div className="stat-grid secondary">
+        {secondaryCards.map((card) => (
+          <StatCard key={card.id} {...card} wide />
+        ))}
+      </div>
 
-        <div style={{ background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-          <h3 style={{ marginTop: 0 }}>Top Selling Products</h3>
-          {topProducts.map(p => (
-            <TopItemRow key={p.rank} {...p} max={maxCount} />
+      {/* Top Selling Items */}
+      <section className="panel">
+        <h2 className="panel-title">Top Selling Items</h2>
+        <div className="product-grid four-col">
+          {topSellingItems.map((item) => (
+            <div className="product-card" key={item.name}>
+              <div className="product-image-wrap">
+                <img src={item.image} alt={item.name} className="product-image" />
+              </div>
+              <div className="product-name">{item.name}</div>
+              <div className="product-sub">{item.sold} sold</div>
+            </div>
           ))}
         </div>
-      </div>
+      </section>
+
+      {/* Category Statistics */}
+      <section className="panel">
+        <h2 className="panel-title">Category Statistics</h2>
+        <div className="category-list">
+          {categoryStats.map((cat) => (
+            <div className="category-row" key={cat.name}>
+              <div className="category-name">{cat.name}</div>
+              <div className="category-bar-track">
+                <div
+                  className="category-bar-fill"
+                  style={{
+                    width: `${(cat.value / maxCategoryValue) * 100}%`,
+                    backgroundColor: cat.color,
+                  }}
+                />
+              </div>
+              <div className="category-value">{cat.value}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Active Orders by Staff */}
+      <section className="panel">
+        <h2 className="panel-title">Active Orders by Staff</h2>
+        <div className="staff-grid">
+          {staffActivity.map((staff) => (
+            <button
+              key={staff.name}
+              className={`staff-card ${
+                selectedStaff === staff.name ? "staff-card-selected" : ""
+              }`}
+              onClick={() => setSelectedStaff(staff.name)}
+              type="button"
+            >
+              <div className="staff-avatar">
+                <User size={20} />
+              </div>
+              <div>
+                <div className="staff-name">{staff.name}</div>
+                <div className="staff-sub">{staff.activeOrders} active orders</div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {activeStaff && (
+          <div className="staff-summary">
+            <div className="staff-summary-title">{activeStaff.name}'s Summary</div>
+            <div className="staff-summary-row">
+              Active Orders: <strong>{activeStaff.activeOrders}</strong>
+            </div>
+            <div className="staff-summary-row">
+              Sales Made: <strong>{activeStaff.salesMade}</strong>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Trending Products */}
+      <section className="panel">
+        <h2 className="panel-title">Trending Products</h2>
+        <div className="product-grid three-col">
+          {trendingProducts.map((item) => (
+            <div className="product-card" key={item.name}>
+              <div className="product-image-wrap tall">
+                <img src={item.image} alt={item.name} className="product-image" />
+              </div>
+              <div className="product-name">{item.name}</div>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
 
-export default Dashboard;
+function StatCard({ label, value, delta, deltaTone, icon: Icon, iconBg, iconColor, wide }) {
+  return (
+    <div className={`stat-card ${wide ? "stat-card-wide" : ""}`}>
+      <div className="stat-card-top">
+        <div className="stat-value">{value}</div>
+        <span className={`stat-delta stat-delta-${deltaTone}`}>{delta}</span>
+        <div className="stat-icon" style={{ backgroundColor: iconBg, color: iconColor }}>
+          <Icon size={18} />
+        </div>
+      </div>
+      <div className="stat-label">{label}</div>
+    </div>
+  );
+}
