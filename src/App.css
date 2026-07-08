@@ -160,7 +160,7 @@ body {
 }
 
 .topbar-search input {
-  border: ;
+  border: none;
   background: transparent;
   outline: none;
   height: 100%;

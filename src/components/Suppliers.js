@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../App.css';
+import AddSupplier from './AddSupplier';
 
 const suppliers = [
   { id: 1, name: 'TechDistribute Ltd', contact: 'James Otieno', email: 'james@techdist.co.ke', phone: '0711 222 333', products: 42, status: 'Active' },
@@ -9,6 +10,7 @@ const suppliers = [
 
 export default function Suppliers() {
   const [search, setSearch] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   const filtered = suppliers.filter(s =>
     s.name.toLowerCase().includes(search.toLowerCase()) || s.contact.toLowerCase().includes(search.toLowerCase())
@@ -16,6 +18,44 @@ export default function Suppliers() {
 
   return (
     <div>
+      {/* Modal Overlay */}
+      {showModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+              width: '50%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+            }}
+          >
+            <AddSupplier
+              onSuccess={(newSupplier) => {
+                setShowModal(false);
+              }}
+              onCancel={() => setShowModal(false)}
+            />
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         {[
           { label: 'Total Suppliers', value: suppliers.length },
@@ -36,7 +76,7 @@ export default function Suppliers() {
             <div className="search-box">
               <input placeholder="Search by name or contact..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
-            <button className="btn btn-primary btn-sm">+ Add Supplier</button>
+            <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>+ Add Supplier</button>
           </div>
         </div>
         <table>

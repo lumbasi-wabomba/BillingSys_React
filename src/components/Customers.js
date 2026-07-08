@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../App.css';
+import AddCustomer from './AddCustomer';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_BASE_URL = 'http://localhost:3001';
 
 const formatCurrency = (value) => `KSh ${Number(value || 0).toLocaleString()}`;
 
@@ -16,6 +17,7 @@ export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/customers`)
@@ -44,28 +46,53 @@ export default function Customers() {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
-        {[
-          { label: 'Total Customers', value: customers.length },
-          { label: 'Active', value: customers.filter(c => c.status === 'Active').length },
-          { label: 'Inactive', value: customers.filter(c => c.status === 'Inactive').length },
-          { label: 'Total Orders', value: customers.reduce((a, c) => a + c.orders, 0) },
-        ].map((s, i) => (
-          <div className="stat-card" key={i}>
-            <div className="stat-value">{s.value}</div>
-            <div className="stat-label">{s.label}</div>
+      {/* Modal Overlay */}
+      {showModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white',
+              borderRadius: '8px',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+              width: '50%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+            }}
+          >
+            <AddCustomer
+              onSuccess={(newCustomer) => {
+                setCustomers((prev) => [...prev, mapCustomer(newCustomer)]);
+                setShowModal(false);
+              }}
+              onCancel={() => setShowModal(false)}
+            />
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       <div className="table-card">
         <div className="table-card-header">
           <div className="table-card-title">Customer List</div>
           <div className="table-toolbar">
             <div className="search-box">
-              <input placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} />
+              <input placeholder="Search by phone or email..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
-            <button className="btn btn-primary btn-sm">+ Add Customer</button>
+            <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>+ Add Customer</button>
           </div>
         </div>
         <table>

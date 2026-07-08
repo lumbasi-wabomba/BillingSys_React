@@ -3,7 +3,7 @@ import db from "../src/dbConn.js";
 
 const router = express.Router();
 
-const allowedFields = ["customer_id", "supplier_id", "cart", "total", "i_date"];
+const allowedFields = ["invoice_no","customer_id", "supplier_id", "cart", "total", "i_date"];
 
 const getPayload = (body) => {
   const payload = {};
@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM invoices WHERE id = $1", [req.params.id]);
+    const result = await db.query("SELECT * FROM invoices WHERE id = $1 OR invoice_no = $1", [req.params.id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Invoice not found" });
     }
@@ -70,8 +70,8 @@ router.put("/:id", async (req, res) => {
     const assignments = fields.map((field, index) => `${field} = $${index + 1}`).join(", ");
     const values = Object.values(payload);
     const result = await db.query(
-      `UPDATE invoices SET ${assignments} WHERE id = $${fields.length + 1} RETURNING *`,
-      [...values, req.params.id]
+      `UPDATE invoices SET ${assignments} WHERE id = $${fields.length + 1} OR invoice_no = $${fields.length + 1} RETURNING *`,
+      [...values, req.params.id, req.params.id]
     );
 
     if (result.rows.length === 0) {
@@ -87,7 +87,7 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    const result = await db.query("DELETE FROM invoices WHERE id = $1 RETURNING id", [req.params.id]);
+    const result = await db.query("DELETE FROM invoices WHERE id = $1 OR invoice_no = $1 RETURNING id", [req.params.id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Invoice not found" });
     }

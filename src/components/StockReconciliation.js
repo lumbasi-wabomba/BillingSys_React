@@ -30,6 +30,8 @@ export default function StockReconciliation() {
   const understock = withDiff.filter(i => i.diff < 0);
   const matched = withDiff.filter(i => i.diff === 0);
   const totalVarianceValue = withDiff.reduce((acc, i) => acc + (i.diff * i.costPrice), 0);
+  const totalStockCount = counted.reduce((acc, i) => acc + parseInt(i.countedQty || 0), 0);
+  const totalSystemQty = items.reduce((acc, i) => acc + i.systemQty, 0);
 
   const filtered = items.filter(i =>
     (warehouse === 'All' || i.warehouse === warehouse) &&
@@ -48,6 +50,8 @@ export default function StockReconciliation() {
           { label: 'Matched', value: matched.length, color: '#10b981' },
           { label: 'Overstock', value: overstock.length, color: '#10b981' },
           { label: 'Understock', value: understock.length, color: '#ef4444' },
+          { label: 'Stock Count', value: totalStockCount, color: '#8b5cf6' },
+          { label: 'Variance Report', value: `${totalVarianceValue > 0 ? '+' : ''}$${totalVarianceValue.toLocaleString()}`, color: totalVarianceValue < 0 ? '#ef4444' : '#10b981' },
         ].map((s, i) => (
           <div className="recon-card" key={i}>
             <div className="recon-num" style={{ color: s.color }}>{s.value}</div>

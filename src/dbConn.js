@@ -12,4 +12,8 @@ const db =  new pool({
     ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false
 });
 
+db.query("SELECT NOW()")
+  .then(() => console.log("✅ Database connected"))
+  .catch(err => console.error("❌ Database connection failed:", err.message));
+
 export default db;
