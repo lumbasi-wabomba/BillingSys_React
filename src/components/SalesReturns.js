@@ -1,17 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../App.css';
 
-const returnsData = [
-  { id: 1, invoice: 'INV-1001', customer: 'Bob Smith', item: 'Bluetooth Speaker', reason: 'Defective', refund: 'KSh 49.99', date: '2026-07-02', status: 'Approved' },
-  { id: 2, invoice: 'INV-1003', customer: 'Evelyn Wangi', item: 'USB-C Cable', reason: 'Wrong item', refund: 'KSh 9.99', date: '2026-07-04', status: 'Pending' },
-];
+const API_BASE_URL = 'http://localhost:3001/api';
 
 export default function SalesReturns() {
+  const [returnsData, setReturnsData] = useState([]);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch returns/exchange data (this endpoint may need to be created in backend)
+    // For now, we can fetch invoices and filter for returns
+    fetch(`${API_BASE_URL}/invoices`)
+      .then(res => res.json())
+      .then(data => {
+        // Mock returns data from invoices - would need a dedicated returns endpoint
+        const returns = Array.isArray(data) ? data.slice(0, 2).map((inv, idx) => ({
+          id: idx + 1,
+          invoice: `INV-${inv.id?.slice(0, 4).toUpperCase() || idx + 1001}`,
+          customer: inv.customer_name || 'Unknown',
+          item: 'Product', // Would need product info from API
+          reason: idx === 0 ? 'Defective' : 'Wrong item',
+          refund: `KSh ${Number(inv.total || 0).toLocaleString()}`,
+          date: new Date(inv.i_date).toISOString().split('T')[0],
+          status: idx === 0 ? 'Approved' : 'Pending'
+        })) : [];
+        setReturnsData(returns);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setReturnsData([]);
+        setLoading(false);
+      });
+  }, []);
 
   const filtered = returnsData.filter(r =>
     r.invoice.toLowerCase().includes(search.toLowerCase()) || r.customer.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return <h3>Loading sales returns...</h3>;
+  }
 
   return (
     <div>

@@ -1,52 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../App.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const reportStats = [
-  { label: 'Total Sales', value: '$284,500', change: '+14.2%', up: true, color: 'orange' },
-  { label: 'Total Purchase', value: '$142,800', change: '+6.5%', up: true, color: 'blue' },
-  { label: 'Gross Profit', value: '$141,700', change: '+22.1%', up: true, color: 'green' },
-  { label: 'Net Loss', value: '$12,400', change: '-3.4%', up: false, color: 'red' },
-  { label: 'Total Returns', value: '$8,250', change: '+1.1%', up: false, color: 'purple' },
-];
+const API_BASE_URL = 'http://localhost:3001/api';
 
-const salesData = [
-  { ref: 'SR-2026-001', date: 'Jun 29, 2026', customer: 'Wayne Baraka', warehouse: 'Main Store', biller: 'Wayne M.', grandTotal: '$2,450', paid: '$2,450', due: '$0.00', status: 'Completed', payStatus: 'Paid' },
-  { ref: 'SR-2026-002', date: 'Jun 28, 2026', customer: 'Bob Smith', warehouse: 'Branch A', biller: 'Sarah K.', grandTotal: '$890', paid: '$500', due: '$390', status: 'Completed', payStatus: 'Partial' },
-  { ref: 'SR-2026-003', date: 'Jun 27, 2026', customer: 'Carol White', warehouse: 'Main Store', biller: 'Wayne M.', grandTotal: '$3,200', paid: '$3,200', due: '$0.00', status: 'Processing', payStatus: 'Paid' },
-  { ref: 'SR-2026-004', date: 'Jun 26, 2026', customer: 'Evaline Mwangi', warehouse: 'Branch B', biller: 'Tom P.', grandTotal: '$650', paid: '$0', due: '$650', status: 'Pending', payStatus: 'Unpaid' },
-  { ref: 'SR-2026-005', date: 'Jun 25, 2026', customer: 'Eva Brown', warehouse: 'Main Store', biller: 'Wayne M.', grandTotal: '$1,100', paid: '$1,100', due: '$0.00', status: 'Completed', payStatus: 'Paid' },
-  { ref: 'SR-2026-006', date: 'Jun 25, 2026', customer: 'Lumbasi Kefa', warehouse: 'Branch A', biller: 'Sarah K.', grandTotal: '$420', paid: '$420', due: '$0.00', status: 'Completed', payStatus: 'Paid' },
-  { ref: 'SR-2026-007', date: 'Jun 24, 2026', customer: 'Grace Kim', warehouse: 'Main Store', biller: 'Tom P.', grandTotal: '$5,600', paid: '$2,800', due: '$2,800', status: 'Completed', payStatus: 'Partial' },
-];
-
-const purchaseData = [
-  { ref: 'PO-2026-101', date: 'Jun 28, 2026', supplier: 'Tech Supplies Co.', warehouse: 'Main Store', grandTotal: '$12,500', paid: '$12,500', due: '$0', status: 'Received' },
-  { ref: 'PO-2026-102', date: 'Jun 27, 2026', supplier: 'Global Goods Ltd.', warehouse: 'Branch A', grandTotal: '$7,800', paid: '$5,000', due: '$2,800', status: 'Partial' },
-  { ref: 'PO-2026-103', date: 'Jun 26, 2026', supplier: 'Prime Distribution', warehouse: 'Main Store', grandTotal: '$3,400', paid: '$3,400', due: '$0', status: 'Received' },
-  { ref: 'PO-2026-104', date: 'Jun 25, 2026', supplier: 'Quick Supply Inc.', warehouse: 'Branch B', grandTotal: '$9,200', paid: '$0', due: '$9,200', status: 'Pending' },
-];
-
-const ChartComponent = () => {
-  // Generate monthly sales and purchase data from June
-  const chartData = [
-    { month: 'Jun 24', sales: 5600, purchase: 9200 },
-    { month: 'Jun 25', sales: 1520, purchase: 12500 },
-    { month: 'Jun 26', sales: 650, purchase: 3400 },
-    { month: 'Jun 27', sales: 3200, purchase: 7800 },
-    { month: 'Jun 28', sales: 890, purchase: 0 },
-    { month: 'Jun 29', sales: 2450, purchase: 0 },
-  ];
-
+const ChartComponent = ({ data }) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+      <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f8" />
         <XAxis dataKey="month" />
         <YAxis />
         <Tooltip 
           contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: 4 }}
-          formatter={(value) => `$${value}`}
+          formatter={(value) => `KSh ${Number(value).toLocaleString()}`}
         />
         <Legend />
         <Line type="monotone" dataKey="sales" stroke="#ff6b35" strokeWidth={2.5} dot={{ fill: '#ff6b35', r: 3 }} name="Sales" />
@@ -63,6 +30,79 @@ export default function Reports() {
   const [activeTab, setActiveTab] = useState('sales');
   const [dateFrom, setDateFrom] = useState('2026-06-01');
   const [dateTo, setDateTo] = useState('2026-06-29');
+  const [reportStats, setReportStats] = useState([]);
+  const [salesData, setSalesData] = useState([]);
+  const [purchaseData, setPurchaseData] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(`${API_BASE_URL}/invoices`).then(r => r.json()),
+      fetch(`${API_BASE_URL}/products`).then(r => r.json()).catch(() => []),
+    ])
+      .then(([invoices, products]) => {
+        const invoiceArray = Array.isArray(invoices) ? invoices : [];
+        const totalSales = invoiceArray.reduce((sum, i) => sum + (i.total || 0), 0);
+
+        // Generate placeholder report stats
+        setReportStats([
+          { label: 'Total Sales', value: `KSh ${Number(totalSales).toLocaleString()}`, change: '+14.2%', up: true, color: 'orange' },
+          { label: 'Total Purchase', value: 'KSh 142,800', change: '+6.5%', up: true, color: 'blue' },
+          { label: 'Gross Profit', value: `KSh ${Math.floor(totalSales * 0.4).toLocaleString()}`, change: '+22.1%', up: true, color: 'green' },
+          { label: 'Net Result', value: `KSh ${Math.floor(totalSales * 0.2).toLocaleString()}`, change: '-3.4%', up: false, color: 'red' },
+          { label: 'Total Returns', value: 'KSh 8,250', change: '+1.1%', up: false, color: 'purple' },
+        ]);
+
+        // Transform invoices to sales data
+        const sales = invoiceArray.map((inv, idx) => ({
+          ref: `SR-${inv.id?.slice(0, 4).toUpperCase() || idx + 1001}`,
+          date: new Date(inv.i_date).toISOString().split('T')[0],
+          customer: inv.customer_name || 'Unknown',
+          warehouse: 'Main Store',
+          biller: 'System',
+          grandTotal: `KSh ${Number(inv.total || 0).toLocaleString()}`,
+          paid: `KSh ${Number(inv.total || 0).toLocaleString()}`,
+          due: 'KSh 0.00',
+          status: 'Completed',
+          payStatus: 'Paid'
+        }));
+        setSalesData(sales);
+
+        // Generate purchase data from products (as placeholder)
+        const purchases = (Array.isArray(products) ? products : []).slice(0, 4).map((prod, idx) => ({
+          ref: `PO-${String(1000 + idx).slice(-4)}`,
+          date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          supplier: 'Supplier ' + String.fromCharCode(65 + idx),
+          warehouse: 'Main Store',
+          grandTotal: `KSh ${Number(prod.bp * prod.quantity || 0).toLocaleString()}`,
+          paid: `KSh ${Number((prod.bp * prod.quantity * 0.7) || 0).toLocaleString()}`,
+          due: `KSh ${Number((prod.bp * prod.quantity * 0.3) || 0).toLocaleString()}`,
+          status: 'Received'
+        }));
+        setPurchaseData(purchases);
+
+        // Generate chart data
+        setChartData([
+          { month: 'Jun 24', sales: 5600, purchase: 9200 },
+          { month: 'Jun 25', sales: 1520, purchase: 12500 },
+          { month: 'Jun 26', sales: 650, purchase: 3400 },
+          { month: 'Jun 27', sales: 3200, purchase: 7800 },
+          { month: 'Jun 28', sales: 890, purchase: 0 },
+          { month: 'Jun 29', sales: totalSales / 100, purchase: 0 },
+        ]);
+
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <h3>Loading reports...</h3>;
+  }
 
   return (
     <div>
@@ -87,7 +127,7 @@ export default function Reports() {
             <button className="btn btn-primary btn-sm">Apply</button>
           </div>
         </div>
-        <ChartComponent />
+        <ChartComponent data={chartData} />
       </div>
 
       <div className="tab-bar">

@@ -1,69 +1,80 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;   
-
-CREATE TABLE products (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(50) NOT NULL, 
-    sku VARCHAR(20) NOT NULL UNIQUE, 
-    category VARCHAR(25) NOT NULL,
-    brand VARCHAR(50) NOT NULL,
-    unit VARCHAR(25) NOT NULL,
-    sp DECIMAL(10,2) NOT NULL CONSTRAINT check_bp_sp CHECK(sp > bp),
-    bp DECIMAL(10,2) NOT NULL,
-    quantity INT, 
-    minQty INT, 
-    warehouse VARCHAR(50) NOT NULL
-    );
-
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(50) NOT NULL,
-  role VARCHAR(20) NOT NULL,
-  emp_date TIMESTAMPTZ,
-  salary DECIMAL(10,2),
-  password TEXT NOT NULL
-  
+CREATE SCHEMA "public";
+CREATE TABLE "customers" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"name" varchar(100) NOT NULL,
+	"phone" varchar(20),
+	"email" varchar(50),
+	"no_of_orders" integer,
+	CONSTRAINT "no_of_orders_non_negative" CHECK ((no_of_orders >= 0))
 );
-
-CREATE TABLE IF NOT EXISTS suppliers (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  address VARCHAR(50),
-  email VARCHAR(50) NOT NULL,
-  phone VARCHAR(20) NOT NULL,
-  speciality VARCHAR(50),
-  authorizer UUID REFERENCES users(id)
-); 
-
-
-CREATE TABLE IF NOT EXISTS expenses (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  e_date TIMESTAMPTZ DEFAULT now(),
-  payment_method VARCHAR(25) NOT NULL,
-  mpesa_code VARCHAR(25) CONSTRAINT require_mpesa CHECK (payment_method ='mpesa'),
-  cheque_no VARCHAR(25) CONSTRAINT require_cheque CHECK (payment_method ='cheque'),
-  items JSONB,
-  total DECIMAL(10,2),
-  notes TEXT, 
-  supplier UUID REFERENCES suppliers(id),
-  product UUID REFERENCES products(id),
-  authorizer UUID REFERENCES users(id)
-  
+CREATE TABLE "expenses" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"e_date" timestamp with time zone DEFAULT now(),
+	"payment_method" varchar(25) NOT NULL,
+	"mpesa_code" varchar(25),
+	"cheque_no" varchar(25),
+	"items" jsonb,
+	"total" numeric(10, 2),
+	"notes" text,
+	"supplier" uuid,
+	"product" uuid,
+	"authorizer" uuid,
+	CONSTRAINT "require_cheque" CHECK (((payment_method)::text = 'cheque'::text)),
+	CONSTRAINT "require_mpesa" CHECK (((payment_method)::text = 'mpesa'::text))
 );
-
-CREATE TABLE IF NOT EXISTS customers (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  phone VARCHAR(20),
-  email VARCHAR(50),
-  no_of_orders INT CONSTRAINT no_of_orders_non_negative CHECK (no_of_orders >= 0)
-  
+CREATE TABLE "invoices" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"customer_id" uuid,
+	"supplier_id" uuid,
+	"cart" jsonb,
+	"total" numeric(10, 2),
+	"i_date" timestamp with time zone DEFAULT now(),
+	"status" varchar(50) DEFAULT 'pending' NOT NULL
 );
-
-CREATE TABLE IF NOT EXISTS invoices (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  customer_id UUID REFERENCES customers(id),
-  supplier_id UUID REFERENCES suppliers(id),
-  cart JSONB, 
-  total DECIMAL(10,2),
-  i_date TIMESTAMPTZ,
+CREATE TABLE "products" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"name" varchar(50) NOT NULL,
+	"sku" varchar(20) NOT NULL CONSTRAINT "products_sku_key" UNIQUE,
+	"category" varchar(25) NOT NULL,
+	"brand" varchar(50) NOT NULL,
+	"unit" varchar(25) NOT NULL,
+	"sp" numeric(10, 2) NOT NULL,
+	"bp" numeric(10, 2) NOT NULL,
+	"quantity" integer,
+	"minqty" integer,
+	"warehouse" varchar(50) NOT NULL,
+	CONSTRAINT "check_bp_sp" CHECK ((sp > bp))
 );
+CREATE TABLE "suppliers" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"name" varchar(100) NOT NULL,
+	"address" varchar(50),
+	"email" varchar(50) NOT NULL,
+	"phone" varchar(20) NOT NULL,
+	"speciality" varchar(50),
+	"authorizer" uuid
+);
+CREATE TABLE "users" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"name" varchar(50) NOT NULL,
+	"role" varchar(20) NOT NULL,
+	"emp_date" timestamp with time zone DEFAULT now(),
+	"salary" numeric(10, 2) DEFAULT '35000',
+	"phone" varchar(15) CONSTRAINT "users_phone_key" UNIQUE,
+	"email" varchar(50) NOT NULL CONSTRAINT "users_email_key" UNIQUE
+);
+CREATE UNIQUE INDEX "customers_pkey" ON "customers" ("id");
+CREATE UNIQUE INDEX "expenses_pkey" ON "expenses" ("id");
+CREATE UNIQUE INDEX "invoices_pkey" ON "invoices" ("id");
+CREATE UNIQUE INDEX "products_pkey" ON "products" ("id");
+CREATE UNIQUE INDEX "products_sku_key" ON "products" ("sku");
+CREATE UNIQUE INDEX "suppliers_pkey" ON "suppliers" ("id");
+CREATE UNIQUE INDEX "users_email_key" ON "users" ("email");
+CREATE UNIQUE INDEX "users_phone_key" ON "users" ("phone");
+CREATE UNIQUE INDEX "users_pkey" ON "users" ("id");
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_authorizer_fkey" FOREIGN KEY ("authorizer") REFERENCES "users"("id");
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_product_fkey" FOREIGN KEY ("product") REFERENCES "products"("id");
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_supplier_fkey" FOREIGN KEY ("supplier") REFERENCES "suppliers"("id");
+ALTER TABLE "invoices" ADD CONSTRAINT "invoices_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "customers"("id");
+ALTER TABLE "invoices" ADD CONSTRAINT "invoices_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id");
+ALTER TABLE "suppliers" ADD CONSTRAINT "suppliers_authorizer_fkey" FOREIGN KEY ("authorizer") REFERENCES "users"("id");

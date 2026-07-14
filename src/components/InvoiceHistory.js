@@ -1,23 +1,30 @@
 import React, { useEffect, useState } from "react";
 
+const API_BASE_URL = "http://localhost:3001/api";
+
 function InvoiceHistory() {
   const [invoices, setInvoices] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Read directly from Local Storage where Invoice.js saves its data
-    try {
-      const storedInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
-      // Reverse them so the newest saved invoices show up at the top
-      setInvoices(storedInvoices.reverse());
-    } catch (err) {
-      console.error("Error reading invoices from localStorage:", err);
-    }
+    // Fetch invoices from API
+    fetch(`${API_BASE_URL}/invoices`)
+      .then(res => res.json())
+      .then(data => {
+        const normalized = Array.isArray(data) ? data.reverse() : [];
+        setInvoices(normalized);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error loading invoices:", err);
+        setLoading(false);
+      });
   }, []);
 
   const clearHistory = () => {
-    if (window.confirm("Are you sure you want to clear all invoice records?")) {
-      localStorage.removeItem("invoices");
+    if (window.confirm("Are you sure you want to delete all invoices?")) {
+      // Optionally call delete endpoint for each invoice
       setInvoices([]);
     }
   };
@@ -25,6 +32,10 @@ function InvoiceHistory() {
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
+
+  if (loading) {
+    return <h3>Loading invoice history...</h3>;
+  }
 
   return (
     <div>
@@ -76,7 +87,7 @@ function InvoiceHistory() {
                         {inv.customerNumber && <div style={{ fontSize: '12px', color: '#9ca3af' }}>#{inv.customerNumber}</div>}
                       </td>
                       <td style={{ textAlign: 'center', fontWeight: '600', color: '#3b82f6' }}>{inv.cart?.length || 0}</td>
-                      <td className="text-right" style={{ fontWeight: '700', color: '#ff6b35', fontSize: '14px' }}>${inv.total.toFixed(2)}</td>
+                      <td className="text-right" style={{ fontWeight: '700', color: '#ff6b35', fontSize: '14px' }}>ksh {Number(inv.total).toFixed(2)}</td>
                       <td style={{ textAlign: 'center' }}>
                         <button 
                           className="btn btn-outline btn-sm"
@@ -100,8 +111,8 @@ function InvoiceHistory() {
                                       <span style={{ fontWeight: '600', color: '#1a1f2e' }}>{item.name}</span>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b7280' }}>
-                                      <span>{item.quantity}x @ ${item.price.toFixed(2)}</span>
-                                      <span style={{ fontWeight: '700', color: '#ff6b35' }}>${(item.price * item.quantity).toFixed(2)}</span>
+                                      <span>{item.quantity}x @ ksh {Number(item.price).toFixed(2)}</span>
+                                      <span style={{ fontWeight: '700', color: '#ff6b35' }}>ksh {Number(item.price * item.quantity).toFixed(2)}</span>
                                     </div>
                                   </div>
                                 ))}
@@ -109,7 +120,7 @@ function InvoiceHistory() {
                             </div>
                             <div style={{ paddingTop: '12px', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'flex-end' }}>
                               <div style={{ fontSize: '14px', fontWeight: '700', color: '#1a1f2e' }}>
-                                Invoice Total: <span style={{ color: '#ff6b35' }}>${inv.total.toFixed(2)}</span>
+                                Invoice Total: <span style={{ color: '#ff6b35' }}>ksh {Number(inv.total).toFixed(2)}</span>
                               </div>
                             </div>
                           </div>

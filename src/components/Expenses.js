@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { products as originalProducts } from "./Products";
+
+const API_BASE_URL = "http://localhost:3001/api";
 
 function Expenses({ navigate }) {
   const [products, setProducts] = useState([]);
@@ -28,22 +29,33 @@ function Expenses({ navigate }) {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    if (originalProducts) {
-      const cleaned = originalProducts.map((item) => {
-        const purchasePrice = typeof item.purchasePrice === "string"
-          ? parseFloat(item.purchasePrice.replace(/[^0-9.-]+/g, ""))
-          : item.purchasePrice;
-        return { ...item, purchasePrice: purchasePrice || 0, stock: item.qty || 0 };
+    // Fetch products from API
+    fetch(`${API_BASE_URL}/products`)
+      .then((res) => res.json())
+      .then((data) => {
+        const cleaned = Array.isArray(data) ? data.map((item) => ({
+          ...item,
+          purchasePrice: Number(item.bp || 0),
+          stock: Number(item.quantity || 0)
+        })) : [];
+        setProducts(cleaned);
+      })
+      .catch((err) => {
+        console.error("Failed to load products:", err);
+        setProducts([]);
       });
-      setProducts(cleaned);
-    }
 
-    try {
-      const saved = JSON.parse(localStorage.getItem("expense_history")) || [];
-      setHistory(saved.reverse());
-    } catch (err) {
-      console.error("Failed to load expense history", err);
-    }
+    // Fetch expense history from backend
+    fetch(`${API_BASE_URL}/expenses`)
+      .then((res) => res.json())
+      .then((data) => {
+        const historyData = Array.isArray(data) ? data : [];
+        setHistory(historyData);
+      })
+      .catch((err) => {
+        console.error("Failed to load expense history:", err);
+        setHistory([]);
+      });
   }, []);
 
   const filteredProducts = products.filter((product) =>
@@ -139,47 +151,50 @@ function Expenses({ navigate }) {
     }
 
     const newExpense = {
-      id: `EX-${Date.now()}`,
-      date: expense.date,
-      title: expense.title,
-      supplierName: expense.supplierName,
-      supplierAddress: expense.supplierAddress,
-      supplierPhone: expense.supplierPhone,
-      paymentMethod: expense.paymentMethod,
-      chequeNumber: expense.chequeNumber,
-      authorizer: expense.authorizer,
-      sellerSignee: expense.sellerSignee,
-      items,
-      notes: expense.notes,
-      subtotal,
+      e_date: expense.date,
+      payment_method: expense.paymentMethod,
+      mpesa_code: expense.paymentMethod === "mpesa" ? expense.chequeNumber : null,
+      cheque_no: expense.paymentMethod === "cheque" ? expense.chequeNumber : null,
+      items: items.map(item => ({
+        id: item.id,
+        name: item.name,
+        sku: item.sku || "",
+        quantity: item.quantity,
+        unitCost: item.unitCost
+      })),
       total: subtotal,
-      itemCount: totalItems
+      notes: expense.notes
     };
 
-    try {
-      const saved = JSON.parse(localStorage.getItem("expense_history")) || [];
-      saved.push(newExpense);
-      localStorage.setItem("expense_history", JSON.stringify(saved));
-      setHistory([newExpense, ...history]);
-      setItems([]);
-      setExpense({
-        ...expense,
-        title: "",
-        supplierName: "",
-        supplierAddress: "",
-        supplierPhone: "",
-        chequeNumber: "",
-        authorizer: "",
-        sellerSignee: "",
-        notes: ""
+    // Save to backend API
+    fetch(`${API_BASE_URL}/expenses`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newExpense)
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setHistory([data, ...history]);
+        setItems([]);
+        setExpense({
+          ...expense,
+          title: "",
+          supplierName: "",
+          supplierAddress: "",
+          supplierPhone: "",
+          chequeNumber: "",
+          authorizer: "",
+          sellerSignee: "",
+          notes: ""
+        });
+        setSearch("");
+        setSelectedProduct(null);
+        alert("Expense saved.");
+      })
+      .catch((err) => {
+        console.error("Failed to save expense:", err);
+        alert("Could not save expense.");
       });
-      setSearch("");
-      setSelectedProduct(null);
-      alert("Expense saved.");
-    } catch (err) {
-      console.error("Failed to save expense", err);
-      alert("Could not save expense.");
-    }
   };
 
   return (
@@ -236,7 +251,7 @@ function Expenses({ navigate }) {
                           <div style={{ color: '#6b7280', fontSize: 12 }}>{product.sku} • Stock {product.stock}</div>
                         </div>
                       </div>
-                      <div style={{ fontWeight: 700, color: '#ff6b35' }}>${product.purchasePrice.toFixed(2)}</div>
+                      <div style={{ fontWeight: 700, color: '#ff6b35' }}>ksh {Number(product.purchasePrice).toFixed(2)}</div>
                     </div>
                   ))}
                 </div>
@@ -303,7 +318,7 @@ function Expenses({ navigate }) {
                         <td className="text-right">
                           <input type="number" min="0" step="0.01" value={item.unitCost} onChange={(e) => updateItemCost(item.id, e.target.value)} style={{ width: 80, padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', textAlign: 'right' }} />
                         </td>
-                        <td className="text-right" style={{ fontWeight: 700 }}>${(item.quantity * item.unitCost).toFixed(2)}</td>
+                        <td className="text-right" style={{ fontWeight: 700 }}>ksh {Number(item.quantity * item.unitCost).toFixed(2)}</td>
                         <td className="text-right"><button className="btn btn-outline btn-sm" onClick={() => removeItem(item.id)}>Remove</button></td>
                       </tr>
                     ))}
@@ -328,7 +343,7 @@ function Expenses({ navigate }) {
                   </div>
                   <div>
                     <div style={{ fontSize: 12, color: '#6b7280' }}>Total</div>
-                    <div style={{ fontSize: 28, fontWeight: 800, color: '#ff6b35' }}>${subtotal.toFixed(2)}</div>
+                    <div style={{ fontSize: 28, fontWeight: 800, color: '#ff6b35' }}>ksh {Number(subtotal).toFixed(2)}</div>
                   </div>
                 </div>
               </div>
@@ -372,7 +387,7 @@ function Expenses({ navigate }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Supplier</span><span>{expense.supplierName || '—'}</span></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Payment</span><span>{expense.paymentMethod.toUpperCase()}</span></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Authorizer</span><span>{expense.authorizer || '—'}</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Total</span><span style={{ fontWeight: 700, color: '#ff6b35' }}>${subtotal.toFixed(2)}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Total</span><span style={{ fontWeight: 700, color: '#ff6b35' }}>ksh {Number(subtotal).toFixed(2)}</span></div>
               </div>
             </div>
 
@@ -424,7 +439,7 @@ function Expenses({ navigate }) {
                   <td>{entry.title}</td>
                   <td>{entry.supplierName}</td>
                   <td className="text-right">{entry.itemCount}</td>
-                  <td className="text-right" style={{ fontWeight: 700, color: '#ff6b35' }}>${entry.total.toFixed(2)}</td>
+                  <td className="text-right" style={{ fontWeight: 700, color: '#ff6b35' }}>ksh {Number(entry.total).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

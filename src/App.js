@@ -33,20 +33,26 @@ function App() {
     switch (activePage) {
       case 'dashboard': return <Dashboard />;
       case 'reports': return <Reports />;
-      case 'products': return <Products onProductClick={(p) => navigate('product-detail', p)} />;
-      case 'product-detail': return <ProductDetail product={selectedProduct} onBack={() => navigate('products')} />;
+      case 'products': return  <Products onProductClick={(product) => { setSelectedProduct(product); setActivePage('product-detail'); }}/>;
+      case 'product-detail': return <ProductDetail
+    product={selectedProduct}
+    onBack={() => { setSelectedProduct(null); setActivePage('products'); }}
+    onEdit={(product) => console.log('Edit:', product)}
+    onDelete={(id) => console.log('Delete:', id)}
+/>;
       case 'stock-reconciliation': return <StockReconciliation />;
       case 'purchase': return <Purchase navigate={navigate} />;
       case 'stock-transfer': return <StockTransfer navigate={navigate} />;
       case 'expenses': return <Expenses navigate={navigate} />;
       case 'invoice': return <Invoice navigate={navigate} />;
       case 'invoice-history': return <InvoiceHistory navigate={navigate} />;
-      case 'sales': return <Sales />;
+      case 'sales': return <Sales navigate={navigate} />;
       case 'returns': return <SalesReturns />;
       case 'pos': return <POS />;
       case 'customers': return <Customers />;
       case 'suppliers': return <Suppliers />;
       case 'users': return <Users />;
+      case 'settings': return <div><h2>Settings Page</h2></div>;
       default: return <Dashboard />;
     }
   };

@@ -3,18 +3,20 @@ import '../App.css';
 
 const API_BASE_URL = 'http://localhost:3001/api';
 
-export default function AddCustomer({
-  customer = null,
+export default function AddUser({
+  user = null,
   onSuccess,
   onCancel,
 }) {
-  const editing = customer !== null;
+  const editing = user !== null;
 
   const [formData, setFormData] = useState({
-    name: customer?.name || '',
-    email: customer?.email || '',
-    phone: customer?.phone || '',
-    no_of_orders: customer?.no_of_orders || 0,
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    role: user?.role || '',
+    salary: user?.salary || '',
+    password: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,7 @@ export default function AddCustomer({
 
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "no_of_orders" ? Number(value) : value,
+      [name]: name === 'salary' ? (value === '' ? '' : Number(value)) : value,
     }));
   };
 
@@ -36,15 +38,28 @@ export default function AddCustomer({
     setError('');
 
     if (!formData.name.trim()) {
-      setError('Customer name is required');
+      setError('User name is required');
       setLoading(false);
       return;
     }
 
     try {
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+        salary: formData.salary === '' ? 0 : formData.salary,
+      };
+
+      // Only send password if entered
+      if (formData.password.trim() !== '') {
+        payload.password = formData.password;
+      }
+
       const url = editing
-        ? `${API_BASE_URL}/customers/${customer.id}`
-        : `${API_BASE_URL}/customers`;
+        ? `${API_BASE_URL}/users/${user.id}`
+        : `${API_BASE_URL}/users`;
 
       const method = editing ? 'PUT' : 'POST';
 
@@ -53,7 +68,7 @@ export default function AddCustomer({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -71,12 +86,15 @@ export default function AddCustomer({
           name: '',
           email: '',
           phone: '',
-          no_of_orders: 0,
+          role: '',
+          salary: '',
+          password: '',
         });
       }
+
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Something went wrong.');
+      setError(err.message || 'Failed to save user.');
     } finally {
       setLoading(false);
     }
@@ -100,11 +118,12 @@ export default function AddCustomer({
       >
         <div className="table-card-header">
           <div className="table-card-title">
-            {editing ? 'Edit Customer' : 'Add New Customer'}
+            {editing ? 'Edit User' : 'Add New User'}
           </div>
         </div>
 
         <div style={{ padding: '30px' }}>
+
           {error && (
             <div
               style={{
@@ -121,123 +140,122 @@ export default function AddCustomer({
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Name */}
-            <div style={{ marginBottom: '20px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  marginBottom: '6px',
-                  fontWeight: '600',
-                  fontSize: '14px',
-                }}
-              >
-                Customer Name <span style={{ color: '#d64545' }}>*</span>
-              </label>
 
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                Name *
+              </label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter customer name"
+                placeholder="Enter user name"
                 required
                 style={{
                   width: '100%',
                   padding: '10px 12px',
                   border: '1px solid #e4e8ef',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
+                  borderRadius: 6,
                 }}
               />
             </div>
 
-            {/* Email */}
             <div style={{ marginBottom: '20px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  marginBottom: '6px',
-                  fontWeight: '600',
-                  fontSize: '14px',
-                }}
-              >
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 600 }}>
                 Email
               </label>
-
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter customer email"
+                placeholder="Enter email"
                 style={{
                   width: '100%',
                   padding: '10px 12px',
                   border: '1px solid #e4e8ef',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
+                  borderRadius: 6,
                 }}
               />
             </div>
 
-            {/* Phone */}
             <div style={{ marginBottom: '20px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  marginBottom: '6px',
-                  fontWeight: '600',
-                  fontSize: '14px',
-                }}
-              >
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 600 }}>
                 Phone
               </label>
-
               <input
-                type="tel"
+                type="text"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="Enter phone number"
+                placeholder="Enter phone"
                 style={{
                   width: '100%',
                   padding: '10px 12px',
                   border: '1px solid #e4e8ef',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
+                  borderRadius: 6,
                 }}
               />
             </div>
 
-            {/* Orders */}
-            <div style={{ marginBottom: '30px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  marginBottom: '6px',
-                  fontWeight: '600',
-                  fontSize: '14px',
-                }}
-              >
-                Number of Orders
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                Role
               </label>
-
               <input
-                type="number"
-                name="no_of_orders"
-                value={formData.no_of_orders}
+                type="text"
+                name="role"
+                value={formData.role}
                 onChange={handleChange}
-                min="0"
+                placeholder="Admin / Cashier / Manager"
                 style={{
                   width: '100%',
                   padding: '10px 12px',
                   border: '1px solid #e4e8ef',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box',
+                  borderRadius: 6,
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                Salary
+              </label>
+              <input
+                type="number"
+                name="salary"
+                value={formData.salary}
+                onChange={handleChange}
+                placeholder="Enter salary"
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '1px solid #e4e8ef',
+                  borderRadius: 6,
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '30px' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontWeight: 600 }}>
+                Password {editing ? '(Leave blank to keep current password)' : ''}
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder={
+                  editing
+                    ? 'Leave blank to keep current password'
+                    : 'Enter password'
+                }
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  border: '1px solid #e4e8ef',
+                  borderRadius: 6,
                 }}
               />
             </div>
@@ -246,7 +264,7 @@ export default function AddCustomer({
               style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                gap: '10px',
+                gap: 10,
               }}
             >
               <button
@@ -255,9 +273,9 @@ export default function AddCustomer({
                 disabled={loading}
                 style={{
                   padding: '10px 20px',
-                  background: '#fff',
                   border: '1px solid #ddd',
-                  borderRadius: '6px',
+                  background: '#fff',
+                  borderRadius: 6,
                   cursor: 'pointer',
                 }}
               >
@@ -272,9 +290,9 @@ export default function AddCustomer({
                   background: '#1f4e79',
                   color: '#fff',
                   border: 'none',
-                  borderRadius: '6px',
+                  borderRadius: 6,
                   cursor: 'pointer',
-                  opacity: loading ? 0.6 : 1,
+                  opacity: loading ? 0.7 : 1,
                 }}
               >
                 {loading
@@ -283,10 +301,12 @@ export default function AddCustomer({
                     : 'Adding...'
                   : editing
                   ? 'Save Changes'
-                  : 'Add Customer'}
+                  : 'Add User'}
               </button>
             </div>
+
           </form>
+
         </div>
       </div>
     </div>

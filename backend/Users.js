@@ -1,9 +1,9 @@
 import express from "express";
-import db from "../src/dbConn.js";
+import db from "./db.js";
 
 const router = express.Router();
 
-const allowedFields = ["name", "role", "emp_date", "salary", "password"];
+const allowedFields = ["name", "role", "emp_date", "salary", "password", "email", "phone"];
 
 const getPayload = (body) => {
   const payload = {};
@@ -12,6 +12,10 @@ const getPayload = (body) => {
       payload[field] = body[field];
     }
   });
+  // Default salary if missing
+  if (payload.salary === undefined) {
+    payload.salary = 35000;
+  }
   return payload;
 };
 

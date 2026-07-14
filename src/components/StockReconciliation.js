@@ -1,24 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../App.css';
 
-const initItems = [
-  { id: 1, sku: 'ACC-101', name: 'Wireless Mouse', category: 'Accessories', systemQty: 85, countedQty: '', icon: '🖱️', warehouse: 'Main Store', unit: 'Piece', costPrice: 12.00 },
-  { id: 2, sku: 'AUD-102', name: 'Bluetooth Speaker', category: 'Electronics', systemQty: 60, countedQty: '', icon: '🔊', warehouse: 'Main Store', unit: 'Piece', costPrice: 32.00 },
-  { id: 3, sku: 'ACC-103', name: 'Laptop Stand', category: 'Accessories', systemQty: 40, countedQty: '', icon: '💻', warehouse: 'Branch A', unit: 'Piece', costPrice: 14.00 },
-  { id: 4, sku: 'ACC-104', name: 'USB-C Cable', category: 'Accessories', systemQty: 150, countedQty: '', icon: '🔌', warehouse: 'Main Store', unit: 'Piece', costPrice: 4.50 },
-  { id: 5, sku: 'ACC-105', name: 'Mechanical Keyboard', category: 'Electronics', systemQty: 25, countedQty: '', icon: '⌨️', warehouse: 'Main Store', unit: 'Piece', costPrice: 38.00 },
-  { id: 6, sku: 'ACC-106', name: 'Phone Charger', category: 'Accessories', systemQty: 5, countedQty: '', icon: '🔋', warehouse: 'Main Store', unit: 'Piece', costPrice: 7.00 },
-  { id: 7, sku: 'ACC-107', name: 'HDMI Cable', category: 'Accessories', systemQty: 0, countedQty: '', icon: '🔗', warehouse: 'Main Store', unit: 'Piece', costPrice: 4.00 },
-  { id: 8, sku: 'ACC-108', name: 'Power Bank', category: 'Electronics', systemQty: 30, countedQty: '', icon: '🔋', warehouse: 'Branch B', unit: 'Piece', costPrice: 18.00 },
-];
+const API_BASE_URL = "http://localhost:3001/api";
 
 export default function StockReconciliation() {
-  const [items, setItems] = useState(initItems);
+  const [items, setItems] = useState([]);
   const [warehouse, setWarehouse] = useState('All');
   const [category, setCategory] = useState('All');
   const [notes, setNotes] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState('count');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/products`)
+      .then(res => res.json())
+      .then(data => {
+        const normalized = Array.isArray(data) ? data.map(p => ({
+          ...p,
+          id: p.id,
+          sku: p.sku,
+          name: p.name,
+          category: p.category,
+          systemQty: Number(p.quantity || 0),
+          countedQty: '',
+          warehouse: p.warehouse || 'Main Store',
+          unit: p.unit || 'Piece',
+          costPrice: Number(p.bp || 0)
+        })) : [];
+        setItems(normalized);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setItems([]);
+        setLoading(false);
+      });
+  }, []);
 
   const updateCount = (id, val) => {
     setItems(prev => prev.map(it => it.id === id ? { ...it, countedQty: val } : it));
@@ -33,12 +51,19 @@ export default function StockReconciliation() {
   const totalStockCount = counted.reduce((acc, i) => acc + parseInt(i.countedQty || 0), 0);
   const totalSystemQty = items.reduce((acc, i) => acc + i.systemQty, 0);
 
+  const warehouses = ['All', ...new Set(items.map(i => i.warehouse).filter(Boolean))];
+  const categories = ['All', ...new Set(items.map(i => i.category).filter(Boolean))];
+
   const filtered = items.filter(i =>
     (warehouse === 'All' || i.warehouse === warehouse) &&
     (category === 'All' || i.category === category)
   );
 
   const diffColor = (diff) => diff === undefined || diff === null || isNaN(diff) ? '' : diff > 0 ? '#10b981' : diff < 0 ? '#ef4444' : '#6b7280';
+
+  if (loading) {
+    return <h3>Loading stock data...</h3>;
+  }
 
   return (
     <div>
@@ -90,20 +115,16 @@ export default function StockReconciliation() {
           {/* Filters & Actions */}
           <div className="filter-bar">
             <select className="filter-select" value={warehouse} onChange={e => setWarehouse(e.target.value)}>
-              <option>All</option>
-              <option>Main Store</option>
-              <option>Branch A</option>
-              <option>Branch B</option>
+              {warehouses.map(w => <option key={w}>{w}</option>)}
             </select>
             <select className="filter-select" value={category} onChange={e => setCategory(e.target.value)}>
-              <option>All</option>
-              {[...new Set(items.map(i => i.category))].map(c => <option key={c}>{c}</option>)}
+              {categories.map(c => <option key={c}>{c}</option>)}
             </select>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
               <button className="btn btn-outline btn-sm" onClick={() => setItems(prev => prev.map(i => ({ ...i, countedQty: String(i.systemQty) })))}>
                 Auto-fill System Qty
               </button>
-              <button className="btn btn-outline btn-sm" onClick={() => setItems(initItems)}>
+              <button className="btn btn-outline btn-sm" onClick={() => setItems(prev => prev.map(i => ({ ...i, countedQty: '' })))}>
                 Reset
               </button>
               <button className="btn btn-primary btn-sm" onClick={() => setSubmitted(true)} disabled={counted.length === 0}>

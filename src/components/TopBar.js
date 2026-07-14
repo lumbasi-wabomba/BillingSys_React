@@ -8,6 +8,7 @@ const pageTitles = {
   products: 'Products',
   'product-detail': 'Product Detail',
   'stock-reconciliation': 'Stock Reconciliation',
+  'stock-transfer': 'Stock Transfer',
   reports: 'Reports',
   sales: 'Sales',
   purchase: 'Purchase',
@@ -18,7 +19,8 @@ const pageTitles = {
   pos: 'Point of Sale',
   expenses: 'Expenses',
   returns: 'Sales Returns',
-  transfer: 'Stock Transfer',
+  invoice: 'Invoice',
+  'invoice-history': 'Invoice History',
 };
 
 function TopBar({ activePage }) {

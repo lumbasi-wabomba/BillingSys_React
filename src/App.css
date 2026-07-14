@@ -227,6 +227,38 @@ body {
 .stat-value { font-size: 24px; font-weight: 800; color: var(--text-primary); }
 .stat-label { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
 
+/* RECONCILIATION SUMMARY CARDS */
+.recon-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.recon-card {
+  background: var(--bg-white);
+  border-radius: var(--radius);
+  border: 1px solid #e8ebf1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.recon-num {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.recon-lbl {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
 /* TABLE */
 .table-card {
   background: var(--bg-white);
@@ -425,24 +457,24 @@ button:hover {
 
 .dash-panel {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 24px 28px 28px;
-  margin-bottom: 20px;
+  border-radius: 12px;
+  padding: 14px 14px 14px;
+  margin-bottom: 14px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .dash-panel-title {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: #111827;
-  margin: 0 0 20px;
+  margin: 0 0 10px;
 }
 
 /* ---- Product grids ---- */
 
 .dash-product-grid {
   display: grid;
-  gap: 20px;
+  gap: 10px;
 }
 
 .dash-product-grid.dash-four-col {
@@ -455,14 +487,16 @@ button:hover {
 
 .dash-product-card {
   border: 1px solid #f3f4f6;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   background: #fff;
+  max-width: 160px;
+  margin: 0 auto;
 }
 
 .dash-product-image-wrap {
   width: 100%;
-  aspect-ratio: 1.4 / 1;
+  aspect-ratio: 1 / 1;
   background: #fafafa;
   display: flex;
   align-items: center;
@@ -471,13 +505,13 @@ button:hover {
 }
 
 .dash-product-image-wrap.dash-tall {
-  aspect-ratio: 1.6 / 1;
+  aspect-ratio: 1 / 1;
 }
 
 .dash-product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
 }
 
 .dash-product-name {
@@ -542,31 +576,17 @@ button:hover {
   box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
 
   font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   color: #111827;
-  padding: 12px 8px 2px;
+  padding: 6px 4px 0;
 }
 
 .dash-product-sub {
   text-align: center;
-  font-size: 13px;
+  font-size: 11px;
   color: #9ca3af;
-  padding-bottom: 12px;
-}
-
-/* ---- Category statistics ---- */
-
-.dash-category-list {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.dash-category-row {
-  display: grid;
-  grid-template-columns: 120px 1fr 50px;
-  align-items: center;
-  gap: 16px;
+  padding-bottom: 6px;
 }
 
 .dash-category-name {

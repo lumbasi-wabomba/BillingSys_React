@@ -1,5 +1,5 @@
 import express from "express";
-import db from "../src/dbConn.js";
+import db from "./db.js";
 
 const router = express.Router();
 
@@ -23,6 +23,13 @@ const getPayload = (body) => {
       payload[field] = body[field];
     }
   });
+  // Provide defaults for required numeric fields if missing
+  if (!payload.quantity && payload.quantity !== 0) {
+    payload.quantity = 0;
+  }
+  if (!payload.minQty && payload.minQty !== 0) {
+    payload.minQty = 0;
+  }
   return payload;
 };
 

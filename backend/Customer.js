@@ -1,5 +1,5 @@
 import express from "express";
-import db from "../src/dbConn.js";
+import db from "./db.js";
 
 const router = express.Router();
 
@@ -12,6 +12,9 @@ const getPayload = (body) => {
       payload[field] = body[field];
     }
   });
+  if (payload.no_of_orders === undefined) {
+    payload.no_of_orders = 0;
+  }
   return payload;
 };
 

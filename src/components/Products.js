@@ -1,41 +1,142 @@
-import React, { useState } from 'react';
-import '../App.css';
+import React, { useState, useEffect } from "react";
+import "../App.css";
+import AddProduct from "./AddProduct";
+import { getProductIcon } from "../utils/iconMapper";
 
-export const products = [
-  { id: 1, name: 'Wireless Mouse', sku: 'ACC-101', category: 'Accessories', brand: 'Logitech', unit: 'Piece', price: '$19.99', purchasePrice: '$12.00', qty: 85, minQty: 20, warehouse: 'Main Store', status: 'Active', sold: 520, icon: '🖱️' },
-  { id: 2, name: 'Bluetooth Speaker', sku: 'AUD-102', category: 'Electronics', brand: 'JBL', unit: 'Piece', price: '$49.99', purchasePrice: '$32.00', qty: 60, minQty: 15, warehouse: 'Main Store', status: 'Active', sold: 340, icon: '🔊' },
-  { id: 3, name: 'Laptop Stand', sku: 'ACC-103', category: 'Accessories', brand: 'Generic', unit: 'Piece', price: '$24.99', purchasePrice: '$14.00', qty: 40, minQty: 10, warehouse: 'Branch A', status: 'Active', sold: 275, icon: '💻' },
-  { id: 4, name: 'USB-C Cable', sku: 'ACC-104', category: 'Accessories', brand: 'Anker', unit: 'Piece', price: '$9.99', purchasePrice: '$4.50', qty: 150, minQty: 30, warehouse: 'Main Store', status: 'Active', sold: 160, icon: '🔌' },
-  { id: 5, name: 'Mechanical Keyboard', sku: 'ACC-105', category: 'Electronics', brand: 'Redragon', unit: 'Piece', price: '$59.99', purchasePrice: '$38.00', qty: 25, minQty: 10, warehouse: 'Main Store', status: 'Active', sold: 95, icon: '⌨️' },
-  { id: 6, name: 'Phone Charger', sku: 'ACC-106', category: 'Accessories', brand: 'Anker', unit: 'Piece', price: '$14.99', purchasePrice: '$7.00', qty: 5, minQty: 20, warehouse: 'Main Store', status: 'Low Stock', sold: 80, icon: '🔋' },
-  { id: 7, name: 'HDMI Cable', sku: 'ACC-107', category: 'Accessories', brand: 'Generic', unit: 'Piece', price: '$8.99', purchasePrice: '$4.00', qty: 0, minQty: 15, warehouse: 'Main Store', status: 'Out of Stock', sold: 65, icon: '🔗' },
-  { id: 8, name: 'Power Bank', sku: 'ACC-108', category: 'Electronics', brand: 'Anker', unit: 'Piece', price: '$29.99', purchasePrice: '$18.00', qty: 30, minQty: 10, warehouse: 'Branch B', status: 'Active', sold: 110, icon: '🔋' },
-];
+const API_BASE_URL = "http://localhost:3001/api";
 
-const stockColor = (s) => s === 'Active' ? 'success' : s === 'Low Stock' ? 'warning' : 'danger';
+const stockColor = (status) =>
+  status === "Active"? "success": status === "Low Stock"? "warning": "danger";
+
+const mapProduct = (product) => ({
+  ...product,
+  purchasePrice: Number(product.bp || 0),
+  sellingPrice: Number(product.sp || 0),
+  qty: Number(product.quantity || 0),
+  minQty: Number(product.minQty || 0),
+  warehouse: product.warehouse || "Main Store",
+  icon: getProductIcon(product.category),
+  status:
+    Number(product.quantity || 0) === 0? "Out of Stock": 
+    Number(product.quantity || 0) <= Number(product.minQty || 0)? "Low Stock": "Active",
+});
 
 export default function Products({ onProductClick }) {
-  const [view, setView] = useState('table');
-  const [search, setSearch] = useState('');
-  const [catFilter, setCatFilter] = useState('All');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState("table");
+  const [search, setSearch] = useState("");
+  const [catFilter, setCatFilter] = useState("All");
+  const [warehouseFilter, setWarehouseFilter] = useState("All");
+  const [showModal, setShowModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
 
-  const filtered = products.filter(p =>
-    (catFilter === 'All' || p.category === catFilter) &&
-    (p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase()))
-  );
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/products`)
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(Array.isArray(data) ? data.map(mapProduct) : []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setProducts([]);
+        setLoading(false);
+      });
+  }, []);
+
+  const filtered = products.filter((p) => {
+    const matchesCategory =
+      catFilter === "All" || p.category === catFilter;
+
+    const matchesWarehouse =
+      warehouseFilter === "All" ||
+      p.warehouse === warehouseFilter;
+
+    const matchesSearch =
+      (p.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (p.sku || "").toLowerCase().includes(search.toLowerCase());
+
+    return (
+      matchesCategory &&matchesWarehouse && matchesSearch
+    );
+  });
+
+  const deleteProduct = async (id) => {
+    if (!window.confirm("Delete this product?")) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to delete product");
+      }
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting product: " + err.message);
+    }
+  };
+
+  if (loading) {
+    return <h3>Loading products...</h3>;
+  }
 
   return (
     <div>
-      {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+
+      {showModal && (
+        <div
+          style={{position: "fixed",inset: 0,background: "rgba(0,0,0,.5)",display: "flex",justifyContent: "center",alignItems: "center",zIndex: 1000,}}
+          onClick={() => { setShowModal(false); setEditingProduct(null); }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{width: "55%",maxHeight: "90vh",overflow: "auto",background: "#fff",borderRadius: 8,}}
+          >
+            <AddProduct
+              product={editingProduct}
+              onSuccess={(newProduct) => {
+                if (editingProduct) {
+                  // Update existing product in list
+                  setProducts((prev) => prev.map((p) => p.id === newProduct.id ? mapProduct(newProduct) : p));
+                } else {
+                  // Add new product
+                  setProducts((prev) => [...prev, mapProduct(newProduct)]);
+                }
+                setShowModal(false);
+                setEditingProduct(null);
+              }}
+              onCancel={() => { setShowModal(false); setEditingProduct(null); }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div
+        style={{display: "grid",gridTemplateColumns: "repeat(4,1fr)",gap: 16,marginBottom: 24,}}
+      >
         {[
-          { label: 'Total Products', value: products.length, color: 'orange' },
-          { label: 'Active', value: products.filter(p => p.status === 'Active').length, color: 'green' },
-          { label: 'Low Stock', value: products.filter(p => p.status === 'Low Stock').length, color: 'purple' },
-          { label: 'Out of Stock', value: products.filter(p => p.status === 'Out of Stock').length, color: 'red' },
+          {
+            label: "Total Products",
+            value: products.length,
+          },
+          {
+            label: "Active",
+            value: products.filter((p) => p.status === "Active").length,
+          },
+          {
+            label: "Low Stock",
+            value: products.filter((p) => p.status === "Low Stock").length,
+          },
+          {
+            label: "Out of Stock",
+            value: products.filter((p) => p.status === "Out of Stock").length,
+          },
         ].map((s, i) => (
           <div className="stat-card" key={i}>
-            <div className="stat-card-header"></div>
             <div className="stat-value">{s.value}</div>
             <div className="stat-label">{s.label}</div>
           </div>
@@ -44,96 +145,314 @@ export default function Products({ onProductClick }) {
 
       <div className="table-card">
         <div className="table-card-header">
-          <div className="table-card-title">Product List</div>
+          <div className="table-card-title">
+            Product List
+          </div>
+
           <div className="table-toolbar">
             <div className="search-box">
-              <input placeholder="Search by name or SKU..." value={search} onChange={e => setSearch(e.target.value)} />
+              <input
+                placeholder="Search by Name or SKU..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value) }
+              />
             </div>
-            <select className="filter-select" value={catFilter} onChange={e => setCatFilter(e.target.value)}>
-              <option>All</option>
-              {[...new Set(products.map(p => p.category))].map(c => <option key={c}>{c}</option>)}
+
+            <select
+              className="filter-select"
+              value={catFilter}
+              onChange={(e) => setCatFilter(e.target.value) }
+            >
+              <option value="All"> All Categories </option>
+
+              {[
+                ...new Set( products.map((p) => p.category).filter(Boolean) ),
+              ].map((c) => ( <option key={c}>{c}</option>
+              ))}
             </select>
-            <select className="filter-select"><option>All Warehouses</option><option>Main Store</option><option>Branch A</option><option>Branch B</option></select>
-            <button className="btn btn-outline btn-sm" onClick={() => setView(view === 'table' ? 'grid' : 'table')}>
-              {view === 'table' ? '⊞ Grid' : '≡ Table'}
+
+            <select
+              className="filter-select"
+              value={warehouseFilter}
+              onChange={(e) => setWarehouseFilter(e.target.value) }
+            >
+              <option value="All"> All Warehouses </option>
+
+              {[
+                ...new Set(
+                  products.map((p) => p.warehouse).filter(Boolean)
+                ),
+              ].map((w) => (
+                <option key={w}>{w}</option>
+              ))}
+            </select>
+
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() =>
+                setView(view === "table" ? "grid" : "table")
+              }
+            >
+              {view === "table" ? "Grid": "Table"}
             </button>
-            <button className="btn btn-primary btn-sm">
+
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => {
+                setEditingProduct(null);
+                setShowModal(true);
+              }}
+            >
               + Add Product
             </button>
+
           </div>
         </div>
-
-        {view === 'table' ? (
+          {view === "table" ? (
           <>
             <table>
               <thead>
                 <tr>
-                  <th><input type="checkbox" /></th>
-                  <th>Product</th><th>SKU</th><th>Category</th><th>Brand</th>
+                  <th>
+                    <input type="checkbox" />
+                  </th>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Category</th>
+                  <th>Brand</th>
                   <th className="text-right">Purchase Price</th>
                   <th className="text-right">Selling Price</th>
                   <th className="text-center">Qty</th>
-                  <th>Status</th><th>Action</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
               </thead>
+
               <tbody>
-                {filtered.map(p => (
-                  <tr key={p.id} style={{ cursor: 'pointer' }}>
-                    <td onClick={e => e.stopPropagation()}><input type="checkbox" /></td>
-                    <td onClick={() => onProductClick(p)}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div className="table-img">{p.icon}</div>
+                {filtered.map((p) => (
+                  <tr key={p.id}>
+                    <td>
+                      <input type="checkbox" />
+                    </td>
+
+                    <td
+                      style={{ cursor: "pointer" }}
+                      onClick={() => onProductClick && onProductClick(p)}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
+                        <img
+                          src={p.icon}
+                          alt={p.name}
+                          className="table-img"
+                          style={{ width: 40, height: 40 }}
+                        />
+
                         <div>
-                          <div style={{ fontWeight: 600, fontSize: 13 }}>{p.name}</div>
-                          <div style={{ fontSize: 11, color: '#9ca3af' }}>{p.warehouse}</div>
+                          <div
+                            style={{
+                              fontWeight: 600,
+                              fontSize: 13,
+                            }}
+                          >
+                            {p.name}
+                          </div>
+
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: "#9ca3af",
+                            }}
+                          >
+                            {p.warehouse}
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td style={{ color: '#6b7280', fontSize: 12 }}>{p.sku}</td>
-                    <td style={{ fontSize: 13 }}>{p.category}</td>
-                    <td style={{ fontSize: 13 }}>{p.brand}</td>
-                    <td className="text-right" style={{ color: '#6b7280' }}>{p.purchasePrice}</td>
-                    <td className="text-right" style={{ fontWeight: 700 }}>{p.price}</td>
-                    <td className="text-center">
-                      <span style={{ fontWeight: 700, color: p.qty === 0 ? '#ef4444' : p.qty < p.minQty ? '#f59e0b' : '#10b981' }}>{p.qty}</span>
+
+                    <td>{p.sku}</td>
+
+                    <td>{p.category}</td>
+
+                    <td>{p.brand}</td>
+
+                    <td className="text-right">
+                      {p.purchasePrice}
                     </td>
-                    <td><span className={`badge badge-${stockColor(p.status)}`}>{p.status}</span></td>
+
+                    <td
+                      className="text-right"
+                      style={{ fontWeight: 700 }}
+                    >
+                      {p.sellingPrice}
+                    </td>
+
+                    <td className="text-center">
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          color:
+                            p.qty === 0
+                              ? "#ef4444"
+                              : p.qty <= p.minQty
+                              ? "#f59e0b"
+                              : "#10b981",
+                        }}
+                      >
+                        {p.qty}
+                      </span>
+                    </td>
+
                     <td>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="btn btn-outline btn-sm btn-icon" title="View" onClick={() => onProductClick(p)}><b>VIEW</b></button>
-                        <button className="btn btn-outline btn-sm btn-icon" title="Edit"><b>EDIT</b></button>
-                        <button className="btn btn-outline btn-sm btn-icon" title="Delete"><b>DELETE</b></button>
+                      <span
+                        className={`badge badge-${stockColor(p.status)}`}
+                      >
+                        {p.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: 4,
+                        }}
+                      >
+                        <button
+                          className="btn btn-outline btn-sm btn-icon"
+                          onClick={() =>
+                            onProductClick && onProductClick(p)
+                          }
+                        >
+                          <b>VIEW</b>
+                        </button>
+
+                        <button
+                          className="btn btn-outline btn-sm btn-icon"
+                          onClick={() => {
+                            setEditingProduct(p);
+                            setShowModal(true);
+                          }}
+                        >
+                          <b>EDIT</b>
+                        </button>
+
+                        <button
+                          className="btn btn-outline btn-sm btn-icon"
+                          onClick={() => deleteProduct(p.id)}
+                        >
+                          <b>DELETE</b>
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
             <div className="pagination">
-              <div className="pagination-info">Showing {filtered.length} of {products.length} products</div>
-              <div className="pagination-btns">
-                {['‹', '1', '2', '3', '›'].map((p, i) => (
-                  <button key={i} className={`page-btn ${p === '1' ? 'active' : ''}`}>{p}</button>
-                ))}
+              <div className="pagination-info">
+                Showing {filtered.length} of {products.length} products
               </div>
             </div>
           </>
         ) : (
-          <div style={{ padding: 20, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
-            {filtered.map(p => (
-              <div key={p.id} onClick={() => onProductClick(p)} style={{
-                border: '1px solid var(--border)', borderRadius: 10, padding: 16, cursor: 'pointer',
-                transition: 'all 0.15s', background: 'var(--bg-white)'
-              }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow)'}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
+          <div
+            style={{
+              padding: 20,
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fill,minmax(220px,1fr))",
+              gap: 16,
+            }}
+          >
+            {filtered.map((p) => (
+              <div
+                key={p.id}
+                onClick={() =>
+                  onProductClick && onProductClick(p)
+                }
+                style={{
+                  border: "1px solid var(--border)",
+                  borderRadius: 10,
+                  padding: 16,
+                  cursor: "pointer",
+                  background: "var(--bg-white)",
+                }}
               >
-                <div style={{ fontSize: 48, textAlign: 'center', marginBottom: 12, background: 'var(--bg-main)', borderRadius: 8, padding: '12px 0' }}>{p.icon}</div>
-                <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4, color: 'var(--text-primary)' }}>{p.name}</div>
-                <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 8 }}>{p.sku}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 800, color: 'var(--primary)' }}>{p.price}</span>
-                  <span className={`badge badge-${stockColor(p.status)}`} style={{ fontSize: 10 }}>{p.status}</span>
+                <div
+                  style={{
+                    textAlign: "center",
+                    marginBottom: 15,
+                    height: 80,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img
+                    src={p.icon}
+                    alt={p.name}
+                    style={{ maxHeight: "100%", maxWidth: "100%" }}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    fontWeight: 700,
+                    marginBottom: 5,
+                  }}
+                >
+                  {p.name}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#888",
+                    marginBottom: 8,
+                  }}
+                >
+                  {p.sku}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "var(--primary)",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {p.sellingPrice}
+                  </span>
+
+                  <span
+                    className={`badge badge-${stockColor(
+                      p.status
+                    )}`}
+                  >
+                    {p.status}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 12,
+                    fontSize: 12,
+                    color: "#6b7280",
+                  }}
+                >
+                  Qty: <b>{p.qty}</b>
                 </div>
               </div>
             ))}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { products as originalProducts } from "./Products";
+
+const API_BASE_URL = "http://localhost:3001/api";
 
 function StockTransfer({ navigate }) {
   const [products, setProducts] = useState([]);
@@ -22,30 +23,33 @@ function StockTransfer({ navigate }) {
     { id: "branch-b", name: "Branch B" }
   ];
 
-  // Initialize products
+  // Fetch products from API
   useEffect(() => {
-    if (originalProducts) {
-      const cleanedProducts = originalProducts.map(p => {
-        const numericPrice = typeof p.price === 'string' 
-          ? parseFloat(p.price.replace(/[^0-9.-]+/g, "")) 
-          : p.price;
-
-        return {
+    fetch(`${API_BASE_URL}/products`)
+      .then(res => res.json())
+      .then(data => {
+        const cleanedProducts = Array.isArray(data) ? data.map(p => ({
           ...p,
-          price: numericPrice || 0,
-          stock: Math.floor(Math.random() * 100) + 10 
-        };
+          price: Number(p.sp || 0),
+          stock: Number(p.quantity || 0)
+        })) : [];
+        setProducts(cleanedProducts);
+      })
+      .catch(err => {
+        console.error("Error loading products:", err);
+        setProducts([]);
       });
-      setProducts(cleanedProducts);
-    }
 
-    // Load transfers from localStorage
-    try {
-      const storedTransfers = JSON.parse(localStorage.getItem("stock_transfers")) || [];
-      setTransfers(storedTransfers.reverse());
-    } catch (err) {
-      console.error("Error loading transfers:", err);
-    }
+    // Fetch transfers from API
+    fetch(`${API_BASE_URL}/transfers`)
+      .then(res => res.json())
+      .then(data => {
+        const storedTransfers = Array.isArray(data) ? data.reverse() : [];
+        setTransfers(storedTransfers);
+      })
+      .catch(err => {
+        console.error("Error loading transfers:", err);
+      });
   }, []);
 
   // Search products

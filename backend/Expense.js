@@ -1,5 +1,5 @@
 import express from "express";
-import db from "../src/dbConn.js";
+import db from "./db.js";
 
 const router = express.Router();
 
@@ -20,9 +20,24 @@ const getPayload = (body) => {
   const payload = {};
   allowedFields.forEach((field) => {
     if (body[field] !== undefined) {
-      payload[field] = body[field];
+      // Convert items array to JSON string for PostgreSQL
+      if (field === "items" && Array.isArray(body[field])) {
+        payload[field] = JSON.stringify(body[field]);
+      } else {
+        payload[field] = body[field];
+      }
     }
   });
+  // Provide defaults for optional FK fields if missing
+  if (!payload.supplier) {
+    payload.supplier = null;
+  }
+  if (!payload.product) {
+    payload.product = null;
+  }
+  if (!payload.authorizer) {
+    payload.authorizer = null;
+  }
   return payload;
 };
 

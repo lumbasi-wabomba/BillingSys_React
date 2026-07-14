@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ShoppingCart,
   DollarSign,
@@ -9,115 +9,160 @@ import {
   User,
 } from "lucide-react";
 
-// ---- Mock data (swap these for real data from dbConn.js / your API) ----
-
-const statCards = [
-  {
-    id: "orders",
-    label: "Total Orders",
-    value: "6,986",
-    delta: "+12.5%",
-    deltaTone: "positive",
-    icon: ShoppingCart,
-    iconBg: "#EDE9FE",
-    iconColor: "#7C3AED",
-  },
-  {
-    id: "sales",
-    label: "Total Sales",
-    value: "KSh 7,516",
-    delta: "+12.5%",
-    deltaTone: "positive",
-    icon: DollarSign,
-    iconBg: "#DBEAFE",
-    iconColor: "#2563EB",
-  },
-  {
-    id: "avg",
-    label: "Average Value",
-    value: "KSh 25.36",
-    delta: "-8.5%",
-    deltaTone: "negative",
-    icon: TrendingUp,
-    iconBg: "#FEE2E2",
-    iconColor: "#DC2626",
-  },
-  {
-    id: "reservations",
-    label: "Reservations",
-    value: "496",
-    delta: "+12.5%",
-    deltaTone: "positive",
-    icon: Calendar,
-    iconBg: "#D1FAE5",
-    iconColor: "#059669",
-  },
-];
-
-const secondaryCards = [
-  {
-    id: "lowstock",
-    label: "Low Stock Items",
-    value: "14",
-    delta: "+3",
-    deltaTone: "negative",
-    icon: AlertTriangle,
-    iconBg: "#FEF3C7",
-    iconColor: "#D97706",
-  },
-  {
-    id: "pending",
-    label: "Pending Orders",
-    value: "9",
-    delta: "Pending",
-    deltaTone: "negative",
-    icon: Clock,
-    iconBg: "#E0E7FF",
-    iconColor: "#4F46E5",
-  },
-];
-
-const topSellingItems = [
-  { name: "Wireless Mouse", sold: 520, image: "/assets/products/mouse.png" },
-  {
-    name: "Bluetooth Speaker",
-    sold: 340,
-    image: "/assets/products/bluetoothspeaker.png",
-  },
-  { name: "Laptop Stand", sold: 275, image: "/assets/products/lapstand.png" },
-  { name: "USB-C Cable", sold: 160, image: "/assets/products/usbcable.png" },
-];
-
-const trendingProducts = [
-  { name: "Wireless Mouse", image: "/assets/products/mouse.png" },
-  { name: "Bluetooth Speaker", image: "/assets/products/bluetoothspeaker.png" },
-  { name: "Laptop Stand", image: "/assets/products/lapstand.png" },
-  { name: "USB-C Cable", image: "/assets/products/usbcable.png" },
-  { name: "Mechanical Keyboard", image: "/assets/products/keyboard.png" },
-  { name: "Phone Charger", image: "/assets/products/charger.png" },
-  { name: "HDMI Cable", image: "/assets/products/hdmi.png" },
-  { name: "Power Bank", image: "/assets/products/powerbank.png" },
-  { name: "Webcam", image: "/assets/products/webcam.png" },
-];
-
-const categoryStats = [
-  { name: "Electronics", value: 420, color: "#3B82F6" },
-  { name: "Accessories", value: 310, color: "#F59E0B" },
-  { name: "Software", value: 150, color: "#10B981" },
-  { name: "Furniture", value: 90, color: "#8B5CF6" },
-];
-
-const staffActivity = [
-  { name: "Baraka", activeOrders: 18, salesMade: "KSh 24,500" },
-  { name: "Evelyn", activeOrders: 12, salesMade: "KSh 15,200" },
-  { name: "Lumbasi", activeOrders: 9, salesMade: "KSh 11,800" },
-];
+const API_BASE_URL = "http://localhost:3001/api";
 
 // ---- Component ----
 
 export default function Dashboard() {
-  const [selectedStaff, setSelectedStaff] = useState(staffActivity[0].name);
-  const maxCategoryValue = Math.max(...categoryStats.map((c) => c.value));
+  const [statCards, setStatCards] = useState([]);
+  const [secondaryCards, setSecondaryCards] = useState([]);
+  const [topSellingItems, setTopSellingItems] = useState([]);
+  const [categoryStats, setCategoryStats] = useState([]);
+  const [trendingProducts, setTrendingProducts] = useState([]);
+  const [selectedStaff, setSelectedStaff] = useState("");
+  const [staffActivity, setStaffActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJson = (url) =>
+      fetch(url).then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status} from ${url}`);
+        return r.json();
+      });
+
+    Promise.all([
+      fetchJson(`${API_BASE_URL}/products`),
+      fetchJson(`${API_BASE_URL}/invoices`),
+      fetchJson(`${API_BASE_URL}/customers`),
+    ])
+      .then(([products, invoices, customers]) => {
+        const productsArray = Array.isArray(products) ? products : [];
+        const invoicesArray = Array.isArray(invoices) ? invoices : [];
+        const customersArray = Array.isArray(customers) ? customers : [];
+
+        // Calculate statistics
+        const totalSales = invoicesArray.reduce((sum, inv) => sum + (inv.total || 0), 0);
+        const avgValue = invoicesArray.length > 0 ? totalSales / invoicesArray.length : 0;
+        const lowStockCount = productsArray.filter(p => 
+          Number(p.quantity || 0) <= Number(p.minQty || 0)
+        ).length;
+
+        // Set primary stat cards
+        setStatCards([
+          {
+            id: "orders",
+            label: "Total Orders",
+            value: invoicesArray.length.toString(),
+            delta: "+12.5%",
+            deltaTone: "positive",
+            icon: ShoppingCart,
+            iconBg: "#EDE9FE",
+            iconColor: "#7C3AED",
+          },
+          {
+            id: "sales",
+            label: "Total Sales",
+            value: `KSh ${Number(totalSales || 0).toLocaleString()}`,
+            delta: "+12.5%",
+            deltaTone: "positive",
+            icon: DollarSign,
+            iconBg: "#DBEAFE",
+            iconColor: "#2563EB",
+          },
+          {
+            id: "avg",
+            label: "Average Value",
+            value: `KSh ${Number(avgValue || 0).toLocaleString()}`,
+            delta: "-8.5%",
+            deltaTone: "negative",
+            icon: TrendingUp,
+            iconBg: "#FEE2E2",
+            iconColor: "#DC2626",
+          },
+          {
+            id: "customers",
+            label: "Total Customers",
+            value: customersArray.length.toString(),
+            delta: "+12.5%",
+            deltaTone: "positive",
+            icon: Calendar,
+            iconBg: "#D1FAE5",
+            iconColor: "#059669",
+          },
+        ]);
+
+        // Set secondary stat cards
+        setSecondaryCards([
+          {
+            id: "lowstock",
+            label: "Low Stock Items",
+            value: lowStockCount.toString(),
+            delta: "+3",
+            deltaTone: "negative",
+            icon: AlertTriangle,
+            iconBg: "#FEF3C7",
+            iconColor: "#D97706",
+          },
+          {
+            id: "pending",
+            label: "Total Products",
+            value: productsArray.length.toString(),
+            delta: "Products",
+            deltaTone: "negative",
+            icon: Clock,
+            iconBg: "#E0E7FF",
+            iconColor: "#4F46E5",
+          },
+        ]);
+
+        // Top selling items (limit to 4)
+        setTopSellingItems(productsArray.slice(0, 4).map(p => ({
+          name: p.name,
+          sold: Math.floor(Math.random() * 500) + 100, // Placeholder
+          image: "/icons/products.png"
+        })));
+
+        // Category stats
+        const categories = {};
+        productsArray.forEach(p => {
+          const cat = p.category || "Other";
+          categories[cat] = (categories[cat] || 0) + 1;
+        });
+        const colors = ["#3B82F6", "#F59E0B", "#10B981", "#8B5CF6"];
+        setCategoryStats(
+          Object.entries(categories).slice(0, 4).map(([name, value], idx) => ({
+            name,
+            value,
+            color: colors[idx % colors.length]
+          }))
+        );
+
+        // Trending products
+        setTrendingProducts(productsArray.slice(0, 9).map(p => ({
+          name: p.name,
+          image: "/icons/products.png"
+        })));
+
+        // Mock staff activity
+        setStaffActivity([
+          { name: "Baraka", activeOrders: Math.floor(Math.random() * 20) + 5, salesMade: `KSh ${Math.floor(Math.random() * 30000) + 10000}` },
+          { name: "Evelyn", activeOrders: Math.floor(Math.random() * 20) + 5, salesMade: `KSh ${Math.floor(Math.random() * 30000) + 10000}` },
+          { name: "Lumbasi", activeOrders: Math.floor(Math.random() * 20) + 5, salesMade: `KSh ${Math.floor(Math.random() * 30000) + 10000}` },
+        ]);
+        setSelectedStaff("Baraka");
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load dashboard data:", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <h3>Loading dashboard...</h3>;
+  }
+
+  const maxCategoryValue = categoryStats.length > 0 ? Math.max(...categoryStats.map((c) => c.value)) : 1;
   const activeStaff = staffActivity.find((s) => s.name === selectedStaff);
 
   return (

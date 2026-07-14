@@ -1,19 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../App.css';
 
-const sales = [
-  { id: 1, invoice: 'INV-1001', customer: 'Bob Smith', items: 3, total: 'KSh 5,499', date: '2026-07-01', status: 'Completed' },
-  { id: 2, invoice: 'INV-1002', customer: 'Carol Lloyd', items: 1, total: 'KSh 1,299', date: '2026-07-02', status: 'Completed' },
-  { id: 3, invoice: 'INV-1003', customer: 'Evelyn Wangi', items: 5, total: 'KSh 9,850', date: '2026-07-03', status: 'Pending' },
-  { id: 4, invoice: 'INV-1004', customer: 'Lombardo Reyes', items: 2, total: 'KSh 3,240', date: '2026-07-04', status: 'Completed' },
-];
+const API_BASE_URL = 'http://localhost:3001/api';
 
-export default function Sales() {
+const formatCurrency = (value) =>
+  `KSh ${Number(value || 0).toLocaleString()}`;
+
+const mapInvoice = (invoice) => ({
+  id: invoice.id,
+  invoice: `INV-${invoice.id?.slice(0, 8).toUpperCase() || 'UNKNOWN'}`,
+  customer: invoice.customer_name || 'Unknown',
+  items: invoice.items_count || 0,
+  total: formatCurrency(invoice.total || 0),
+  date: new Date(invoice.i_date).toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+  status: invoice.status || 'Completed',
+});
+
+export default function Sales({ navigate }) {
+  const [sales, setSales] = useState([]);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/invoices`)
+      .then((res) => res.json())
+      .then((data) => {
+        const normalized = Array.isArray(data)
+          ? data.map(mapInvoice)
+          : [];
+        setSales(normalized);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setSales([]);
+        setLoading(false);
+      });
+  }, []);
 
   const filtered = sales.filter(s =>
     s.invoice.toLowerCase().includes(search.toLowerCase()) || s.customer.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return <h3>Loading sales...</h3>;
+  }
 
   return (
     <div>
@@ -37,7 +68,7 @@ export default function Sales() {
             <div className="search-box">
               <input placeholder="Search by invoice or customer..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
-            <button className="btn btn-primary btn-sm">+ New Sale</button>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate && navigate('invoice')}>+ New Sale</button>
           </div>
         </div>
         <table>

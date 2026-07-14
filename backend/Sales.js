@@ -1,17 +1,26 @@
 import express from "express";
-import db from "../src/dbConn.js";
+import db from "./db.js";
 
 const router = express.Router();
 
-const allowedFields = ["customer_id", "supplier_id", "cart", "total", "i_date"];
+const allowedFields = ["customer_id", "supplier_id", "cart", "total", "i_date", "status"];
 
 const getPayload = (body) => {
   const payload = {};
   allowedFields.forEach((field) => {
     if (body[field] !== undefined) {
-      payload[field] = body[field];
+      // Stringify arrays/objects for JSONB columns (cart)
+      if (field === "cart" && typeof body[field] === "object") {
+        payload[field] = JSON.stringify(body[field]);
+      } else {
+        payload[field] = body[field];
+      }
     }
   });
+  // Default status to 'paid' if not provided
+  if (!payload.status) {
+    payload.status = 'paid';
+  }
   return payload;
 };
 
@@ -52,7 +61,19 @@ router.post("/", async (req, res) => {
       `INSERT INTO invoices (${fields.join(", ")}) VALUES (${placeholders}) RETURNING *`,
       values
     );
-    res.status(201).json(result.rows[0]);
+
+    // Update product quantities (decrease stock)
+    const invoice = result.rows[0];
+    if (invoice.cart && Array.isArray(invoice.cart)) {
+      for (const item of invoice.cart) {
+        await db.query(
+          `UPDATE products SET quantity = GREATEST(0, quantity - $1) WHERE id = $2`,
+          [item.quantity, item.id]
+        );
+      }
+    }
+
+    res.status(201).json(invoice);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });

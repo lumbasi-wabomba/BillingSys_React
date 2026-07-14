@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-// Import the named products array directly from your team's file
-import { products as originalProducts } from "./Products"; 
+import { getProductIcon } from "../utils/iconMapper";
+
+const API_BASE_URL = "http://localhost:3001/api";
 
 
 function Invoice({ navigate }) { 
@@ -9,22 +10,24 @@ function Invoice({ navigate }) {
   const [customerName, setCustomerName] = useState("");
   const [customerNumber, setCustomerNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("paid");
 
-  // Clean string prices ('$1,299' -> 1299) on mount so calculations don't return NaN
+  // Fetch products from API on mount
   useEffect(() => {
-    if (originalProducts) {
-      const cleanedProducts = originalProducts.map(p => {
-        const numericPrice = typeof p.price === 'string' 
-          ? parseFloat(p.price.replace(/[^0-9.-]+/g, "")) 
-          : p.price;
-
-        return {
+    fetch(`${API_BASE_URL}/products`)
+      .then((res) => res.json())
+      .then((data) => {
+        const cleanedProducts = Array.isArray(data) ? data.map(p => ({
           ...p,
-          price: numericPrice || 0
-        };
+          price: Number(p.sp || 0), // Use selling price for invoices
+          icon: getProductIcon(p.category) // Add icon for display
+        })) : [];
+        setProducts(cleanedProducts);
+      })
+      .catch((err) => {
+        console.error("Failed to load products:", err);
+        setProducts([]);
       });
-      setProducts(cleanedProducts);
-    }
   }, []);
 
   // Filter products based on search value input
@@ -56,40 +59,52 @@ function Invoice({ navigate }) {
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // Client-side saving using localStorage and redirection
+  // Save invoice to backend API
   const saveInvoice = () => {
     if (!customerName.trim() || cart.length === 0) {
       alert("Please provide a customer name and add items to the cart.");
       return;
     }
 
+    // Strip fields that shouldn't go to DB (icons, computed values)
+    const cleanCart = cart.map(item => ({
+      id: item.id,
+      name: item.name,
+      sku: item.sku,
+      price: item.price,
+      quantity: item.quantity
+    }));
+
     const newInvoice = {
-      id: "inv_" + Date.now(),
-      date: new Date().toLocaleDateString(),
-      customerName,
-      customerNumber,
-      cart,
-      total
+      customer_id: null,
+      cart: cleanCart,
+      total: total,
+      i_date: new Date().toISOString(),
+      status: status
     };
 
-    try {
-      const existingInvoices = JSON.parse(localStorage.getItem("invoices")) || [];
-      existingInvoices.push(newInvoice);
-      localStorage.setItem("invoices", JSON.stringify(existingInvoices));
-
-      alert("Invoice saved successfully!");
-      
-      // Clear current form state values
-      setCart([]);
-      setCustomerName("");
-      setCustomerNumber("");
-
-      // Redirect immediately to your Invoice History screen component case
-      navigate("invoice-history"); 
-    } catch (err) {
-      console.error("Local Storage Error:", err);
-      alert("Failed to save invoice locally.");
-    }
+    fetch(`${API_BASE_URL}/invoices`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newInvoice)
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then(errData => { throw new Error(errData.error || "Failed to save invoice"); });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        alert("Invoice saved successfully!");
+        setCart([]);
+        setCustomerName("");
+        setCustomerNumber("");
+        navigate("sales"); 
+      })
+      .catch((err) => {
+        console.error("Failed to save invoice:", err);
+        alert("Failed to save invoice: " + err.message);
+      });
   };
 
   return (
@@ -149,7 +164,7 @@ function Invoice({ navigate }) {
                     <span style={{ fontSize: '20px' }}>{p.icon}</span>
                     <div>
                       <div style={{ fontSize: '13.5px', fontWeight: '600', color: '#1a1f2e' }}>{p.name}</div>
-                      <div style={{ fontSize: '12px', color: '#ff6b35', fontWeight: '700' }}>${p.price.toFixed(2)}</div>
+                      <div style={{ fontSize: '12px', color: '#ff6b35', fontWeight: '700' }}>KSh {Number(p.price).toLocaleString()}</div>
                     </div>
                   </div>
                   <button className="btn btn-primary btn-sm" onClick={() => addToCart(p)}>Add</button>
@@ -187,9 +202,9 @@ function Invoice({ navigate }) {
                       <span style={{ fontSize: '18px' }}>{item.icon}</span>
                       <span>{item.name}</span>
                     </td>
-                    <td className="text-right">${item.price.toFixed(2)}</td>
+                    <td className="text-right">KSh {Number(item.price).toLocaleString()}</td>
                     <td className="text-right" style={{ fontWeight: '600' }}>{item.quantity}</td>
-                    <td className="text-right" style={{ fontWeight: '700', color: '#ff6b35' }}>${(item.price * item.quantity).toFixed(2)}</td>
+                    <td className="text-right" style={{ fontWeight: '700', color: '#ff6b35' }}>KSh {Number(item.price * item.quantity).toLocaleString()}</td>
                     <td style={{ textAlign: 'center' }}>
                       <button className="btn btn-outline btn-sm" onClick={() => removeFromCart(item.id)}>Remove</button>
                     </td>
@@ -199,13 +214,34 @@ function Invoice({ navigate }) {
             </table>
             <div style={{ padding: '16px', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'flex-end' }}>
               <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a1f2e' }}>
-                Total: <span style={{ color: '#ff6b35' }}>${total.toFixed(2)}</span>
+                Total: <span style={{ color: '#ff6b35' }}>KSh {Number(total).toLocaleString()}</span>
               </div>
             </div>
           </>
         ) : (
           <div style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>Your cart is empty</div>
         )}
+      </div>
+
+      {/* STATUS SECTION */}
+      <div className="table-card mb-4">
+        <div className="table-card-header">
+          <div className="table-card-title">Payment Status</div>
+        </div>
+        <div style={{ padding: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          {['paid', 'pending', 'credit'].map((option) => (
+            <label key={option} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer', textTransform: 'capitalize' }}>
+              <input
+                type="radio"
+                name="status"
+                value={option}
+                checked={status === option}
+                onChange={(e) => setStatus(e.target.value)}
+              />
+              {option}
+            </label>
+          ))}
+        </div>
       </div>
 
       {/* TOTAL AND ACTIONS SECTION */}

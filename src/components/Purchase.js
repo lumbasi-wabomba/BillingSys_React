@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { products as originalProducts } from "./Products";
+// import { products as originalProducts } from "./Products";
+
+const API_BASE_URL = "http://localhost:3001/api";
 
 function Purchase({ navigate }) {
   const [products, setProducts] = useState([]);
@@ -15,43 +17,56 @@ function Purchase({ navigate }) {
     supplierPhone: "",
     paymentMethod: "cash",
     chequeNumber: "",
-    authorizer: "",
-    sellerSignee: ""
+    // authorizer: "",
+    // sellerSignee: "",
+    status: "paid"
   });
   const [history, setHistory] = useState([]);
+  const [suppliers,setSuppliers]=useState([]);
 
   useEffect(() => {
-    if (originalProducts) {
-      const cleaned = originalProducts.map((item) => {
-        const purchasePrice = typeof item.purchasePrice === "string"
-          ? parseFloat(item.purchasePrice.replace(/[^0-9.-]+/g, ""))
-          : item.purchasePrice;
-        const sellingPrice = typeof item.price === "string"
-          ? parseFloat(item.price.replace(/[^0-9.-]+/g, ""))
-          : item.price;
+    fetch(`${API_BASE_URL}/products`)
+        .then(res => res.json())
+        .then(data => {
+            const normalized = Array.isArray(data) ? data.map(product => ({
+                ...product,
+                purchasePrice: Number(product.bp || 0),
+                sellingPrice: Number(product.sp || 0),
+                stock: Number(product.quantity || 0),
+                minQty: Number(product.minQty || 0),
+            })) : [];
 
-        return {
-          ...item,
-          purchasePrice: purchasePrice || 0,
-          price: sellingPrice || 0,
-          stock: item.qty || 0
-        };
-      });
-      setProducts(cleaned);
-    }
+            setProducts(normalized);
+        })
+        .catch(console.error);
+    }, []);
 
-    try {
-      const saved = JSON.parse(localStorage.getItem("purchase_history")) || [];
-      setHistory(saved.reverse());
-    } catch (err) {
-      console.error("Error reading purchase history:", err);
-    }
-  }, []);
+    useEffect(() => {
+      fetch(`${API_BASE_URL}/suppliers`)
+        .then(res=>res.json())
+        .then(setSuppliers);
+    },[]);
 
   const filteredProducts = products.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase()) ||
     item.sku.toLowerCase().includes(search.toLowerCase())
   );
+  const handleSupplierChange = (e) => {
+  const selectedId = String(e.target.value);
+  const supplier = suppliers.find(
+      s => String(s.id) === selectedId
+  );
+
+  if (!supplier) return;
+
+  setPurchase(prev => ({
+      ...prev,
+      supplierId: supplier.id,
+      supplierName: supplier.name,
+      supplierAddress: supplier.address,
+      supplierPhone: supplier.phone
+  }));
+  };
 
   const addToCart = (item) => {
     const existing = cart.find((cartItem) => cartItem.id === item.id);
@@ -66,7 +81,7 @@ function Purchase({ navigate }) {
     }
     setSearch("");
     setShowResults(false);
-    setSelectedProduct(null);
+    setSelectedProduct(item);
   };
 
   const updateQuantity = (id, quantity) => {
@@ -87,7 +102,7 @@ function Purchase({ navigate }) {
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const orderTotal = cart.reduce((sum, item) => sum + item.quantity * item.purchasePrice, 0);
 
-  const savePurchase = () => {
+  const savePurchase = async () => {
     if (!purchase.supplierName.trim() || !purchase.supplierAddress.trim() || !purchase.supplierPhone.trim()) {
       alert("Please fill in supplier details.");
       return;
@@ -113,33 +128,41 @@ function Purchase({ navigate }) {
       supplierPhone: purchase.supplierPhone,
       paymentMethod: purchase.paymentMethod,
       chequeNumber: purchase.chequeNumber,
-      authorizer: purchase.authorizer,
-      sellerSignee: purchase.sellerSignee,
+      // authorizer: purchase.authorizer,
+      // sellerSignee: purchase.sellerSignee,
       items: cart,
       totalAmount: orderTotal,
       itemCount,
-      status: "Pending"
+      status: purchase.status
     };
 
     try {
-      const existing = JSON.parse(localStorage.getItem("purchase_history")) || [];
-      existing.push(newPurchase);
-      localStorage.setItem("purchase_history", JSON.stringify(existing));
-      setHistory([newPurchase, ...history]);
-      setCart([]);
-      setPurchase({
-        ...purchase,
-        supplierName: "",
-        supplierAddress: "",
-        supplierPhone: "",
-        chequeNumber: "",
-        authorizer: "",
-        sellerSignee: ""
+      const response = await fetch(`${API_BASE_URL}/purchases`,{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            supplier_id:purchase.supplierId,
+            payment_method:purchase.paymentMethod,
+            cheque_number:purchase.chequeNumber,
+            // authorizer:purchase.authorizer,
+            items:cart.map(item=>({
+                product_id:item.id,
+                quantity:item.quantity,
+                unit_cost:item.purchasePrice
+            }))
+        })
       });
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || "Failed to save purchase");
+      }
       alert("Purchase order saved successfully.");
     } catch (err) {
       console.error("Error saving purchase:", err);
-      alert("Unable to save purchase.");
+      const errorMsg = err.message || "Unknown error";
+      alert("Failed to save purchase: " + errorMsg + "\n\nCheck terminal/console for full error details.");
     }
   };
 
@@ -162,8 +185,21 @@ function Purchase({ navigate }) {
                 <input type="date" name="date" value={purchase.date} onChange={handlePurchaseChange} className="filter-input" />
               </div>
               <div>
-                <label className="filter-label">Supplier Name</label>
-                <input type="text" name="supplierName" value={purchase.supplierName} onChange={handlePurchaseChange} className="filter-input" placeholder="Supplier name" />
+                  <label className="filter-label">Supplier</label>
+
+                  <select
+                      className="filter-input"
+                      value={purchase.supplierId || ""}
+                      onChange={handleSupplierChange}
+                  >
+                      <option value="">Select Supplier</option>
+
+                      {suppliers.map((supplier) => (
+                          <option key={supplier.id} value={supplier.id}>
+                              {supplier.name}
+                          </option>
+                      ))}
+                  </select>
               </div>
             </div>
 
@@ -197,7 +233,7 @@ function Purchase({ navigate }) {
                         <div className="table-img" style={{ width: '34px', height: '34px' }}>{item.icon}</div>
                         <div>
                           <div style={{ fontWeight: 600 }}>{item.name}</div>
-                          <div style={{ fontSize: 12, color: '#6b7280' }}>{item.sku} • Stock {item.stock}</div>
+                          <div style={{ fontSize: 12, color: '#6b7280' }}>{item.sku} • Stock {item.quantity}</div>
                         </div>
                       </div>
                       <span style={{ color: '#ff6b35', fontWeight: 700 }}>${item.purchasePrice.toFixed(2)}</span>
@@ -236,7 +272,7 @@ function Purchase({ navigate }) {
                             <div style={{ fontSize: 12, color: '#6b7280' }}>{item.sku}</div>
                           </div>
                         </td>
-                        <td className="text-right" style={{ color: '#6b7280' }}>{item.stock}</td>
+                        <td className="text-right" style={{ color: '#6b7280' }}>{item.quantity}</td>
                         <td className="text-right">
                           <input
                             type="number"
@@ -246,8 +282,8 @@ function Purchase({ navigate }) {
                             style={{ width: '60px', padding: '6px 8px', borderRadius: 6, border: '1px solid var(--border)', textAlign: 'right' }}
                           />
                         </td>
-                        <td className="text-right">${item.purchasePrice.toFixed(2)}</td>
-                        <td className="text-right">${(item.quantity * item.purchasePrice).toFixed(2)}</td>
+                        <td className="text-right">KSh {item.purchasePrice.toLocaleString()}</td>
+                        <td className="text-right">KSh {(item.quantity * item.purchasePrice).toLocaleString()}</td>
                         <td className="text-right"><button className="btn btn-outline btn-sm" onClick={() => removeCartItem(item.id)}>Remove</button></td>
                       </tr>
                     ))}
@@ -289,9 +325,28 @@ function Purchase({ navigate }) {
               </div>
             </div>
 
-            <div style={{ marginTop: '20px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button className="btn btn-primary" onClick={savePurchase}>Save Purchase</button>
-              <button className="btn btn-outline" onClick={() => { setCart([]); setSearch(""); setSelectedProduct(null); setPurchase({ ...purchase, supplierName: "", supplierAddress: "", supplierPhone: "", chequeNumber: "", authorizer: "", sellerSignee: "" }); }}>Reset</button>
+            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label className="filter-label">Status</label>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  {['paid', 'pending', 'credit'].map((option) => (
+                    <label key={option} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer', textTransform: 'capitalize' }}>
+                      <input
+                        type="radio"
+                        name="status"
+                        value={option}
+                        checked={purchase.status === option}
+                        onChange={handlePurchaseChange}
+                      />
+                      {option}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button className="btn btn-primary" onClick={savePurchase}>Save Purchase</button>
+                <button className="btn btn-outline" onClick={() => { setCart([]); setSearch(""); setSelectedProduct(null); setPurchase({ ...purchase, supplierName: "", supplierAddress: "", supplierPhone: "", chequeNumber: "", authorizer: "", sellerSignee: "" }); }}>Reset</button>
+              </div>
             </div>
           </div>
 
