@@ -55,9 +55,9 @@ const navItems = [
   { id: 'products', label: 'Products', icon: 'products' },
   { id: 'stock-reconciliation', label: 'Stock Reconciliation', icon: 'stock' },
   { id: 'stock-transfer', label: 'Stock Transfer', icon: 'transfer' },
-  { label: 'Sales', type: 'section' },
+  /*{ label: 'Sales', type: 'section' },
   { id: 'sales', label: 'Sales', icon: 'sales', badge: 3 },
-  { id: 'returns', label: 'Sales Returns', icon: 'returns' },
+  { id: 'returns', label: 'Sales Returns', icon: 'returns' },*/
   { id: 'pos', label: 'POS', icon: 'pos' },
   { label: 'Purchases', type: 'section' },
   { id: 'purchase', label: 'Purchase', icon: 'purchase' },

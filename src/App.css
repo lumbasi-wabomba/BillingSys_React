@@ -516,6 +516,66 @@ button:hover {
 
 .dash-product-name {
   text-align: center;
+  font-size: 16px;
+  color: #1e2a38;
+  border: 1px solid #e0e0e0;
+}
+
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background-color: #ff6b35;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #e85a2a;
+}
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ORANGE OUTLINE BUTTON */
+.btn-outline {
+  background: transparent;
+  border: 2px solid #ff6b35;
+  color: #ff6b35;
+}
+
+.btn-outline:hover {
+  background: #ff6b35;
+  color: white;
+}
+
+.filter-input,
+.search-box input {
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+/* 🔥 when user clicks / types */
+.filter-input:focus,
+.search-box input:focus {
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+
+  font-size: 14px;
   font-size: 12px;
   font-weight: 500;
   color: #111827;
