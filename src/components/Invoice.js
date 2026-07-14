@@ -11,15 +11,14 @@ function Invoice({ navigate }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("paid");
 
-  // Fetch products from API on mount
   useEffect(() => {
     fetch(`${API_BASE_URL}/products`)
       .then((res) => res.json())
       .then((data) => {
         const cleanedProducts = Array.isArray(data) ? data.map(p => ({
           ...p,
-          price: Number(p.sp || 0), // Use selling price for invoices
-          icon: getProductIcon(p.category) // Add icon for display
+          price: Number(p.sp || 0), 
+          icon: getProductIcon(p.category) 
         })) : [];
         setProducts(cleanedProducts);
       })
@@ -160,7 +159,22 @@ function Invoice({ navigate }) {
               {filteredProducts.map(p => (
                 <div key={p.id} style={{ padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '20px' }}>{p.icon}</span>
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '8px', 
+                      backgroundColor: '#f3f4f6', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      padding: '4px'
+                    }}>
+                      <img
+                        src={p.icon}
+                        alt={p.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                      />
+                    </div>
                     <div>
                       <div style={{ fontSize: '13.5px', fontWeight: '600', color: '#1a1f2e' }}>{p.name}</div>
                       <div style={{ fontSize: '12px', color: '#ff6b35', fontWeight: '700' }}>KSh {Number(p.price).toLocaleString()}</div>
@@ -198,7 +212,23 @@ function Invoice({ navigate }) {
                 {cart.map((item) => (
                   <tr key={item.id}>
                     <td style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '18px' }}>{item.icon}</span>
+                      <div style={{ 
+                        width: '36px', 
+                        height: '36px', 
+                        borderRadius: '6px', 
+                        backgroundColor: '#f3f4f6', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        padding: '4px',
+                        flexShrink: 0
+                      }}>
+                        <img
+                          src={item.icon}
+                          alt={item.name}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
+                      </div>
                       <span>{item.name}</span>
                     </td>
                     <td className="text-right">KSh {Number(item.price).toLocaleString()}</td>

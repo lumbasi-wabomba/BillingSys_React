@@ -43,7 +43,7 @@ export default function Reports() {
     ])
       .then(([invoices, products]) => {
         const invoiceArray = Array.isArray(invoices) ? invoices : [];
-        const totalSales = invoiceArray.reduce((sum, i) => sum + (i.total || 0), 0);
+        const totalSales = invoiceArray.reduce((sum, i) => sum + Number(i.total || 0), 0);
 
         // Generate placeholder report stats
         setReportStats([
