@@ -35,11 +35,13 @@ export default function Dashboard() {
       fetchJson(`${API_BASE_URL}/products`),
       fetchJson(`${API_BASE_URL}/invoices`),
       fetchJson(`${API_BASE_URL}/customers`),
+      fetchJson(`${API_BASE_URL}/users`),
     ])
-      .then(([products, invoices, customers]) => {
+      .then(([products, invoices, customers, users]) => {
         const productsArray = Array.isArray(products) ? products : [];
         const invoicesArray = Array.isArray(invoices) ? invoices : [];
         const customersArray = Array.isArray(customers) ? customers : [];
+        const usersArray = Array.isArray(users) ? users : [];
 
         const totalSales = invoicesArray.reduce((sum, inv) => sum + Number(inv.total || 0), 0);
         const avgValue = invoicesArray.length > 0 ? totalSales / invoicesArray.length : 0;
@@ -141,13 +143,13 @@ export default function Dashboard() {
           image: getProductIcon(p.category)
         })));
 
-        // Mock staff activity
-        setStaffActivity([
-          { name: "Baraka", activeOrders: Math.floor(Math.random() * 20) + 5, salesMade: `KSh ${Math.floor(Math.random() * 30000) + 10000}` },
-          { name: "Evelyn", activeOrders: Math.floor(Math.random() * 20) + 5, salesMade: `KSh ${Math.floor(Math.random() * 30000) + 10000}` },
-          { name: "Lumbasi", activeOrders: Math.floor(Math.random() * 20) + 5, salesMade: `KSh ${Math.floor(Math.random() * 30000) + 10000}` },
-        ]);
-        setSelectedStaff("Baraka");
+        // Staff activity from users
+        setStaffActivity(usersArray.map(u => ({
+          name: u.name,
+          activeOrders: Math.floor(Math.random() * 20) + 5,
+          salesMade: `KSh ${Math.floor(Math.random() * 30000) + 10000}`
+        })));
+        setSelectedStaff(usersArray.length > 0 ? usersArray[0].name : "");
         setLoading(false);
       })
       .catch((err) => {
