@@ -8,6 +8,7 @@
 ![Render](https://img.shields.io/badge/Render-Deployed-46E3B7?logo=render)
 
 A full-stack **Point-of-Sale (POS) and Inventory Management** application built for electronics retail shops. The frontend is a React 19 single-page application with a sidebar-driven navigation system, and the backend is an Express.js REST API that connects to a Neon (PostgreSQL) database. The project is containerized with Docker and deployed via a GitHub Actions CI/CD pipeline to Render.
+[Billing System](https://reactwork-zt49.onrender.com/) link to the deployed site
 
 ---
 
