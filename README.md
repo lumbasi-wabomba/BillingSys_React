@@ -151,7 +151,7 @@ The backend lives in the **`backend/`** directory and is a separate Express.js 5
 
 ### API Server (`backend/dbServer.js`)
 
-Runs on **port 3001** with CORS enabled. It mounts six REST resource routers:
+Runs on **port 3001** with CORS enabled. It mounts eight REST resource routers:
 
 | Route                 | File                     |
 |-----------------------|--------------------------|
@@ -166,16 +166,28 @@ Runs on **port 3001** with CORS enabled. It mounts six REST resource routers:
 
 ### Database Connection (`backend/db.js`)
 
-Connects to **Neon PostgreSQL** using the `pg` library with SSL:
+Connects to **Neon PostgreSQL** using the `pg` library with **SSL**.
+It loads the environment from the project-root `.env` (falling back to `backend/.env`)
+and supports both a single `DATABASE_URL` connection string or individual `PG*` fields:
 
 ```js
-const db = new Pool({
-  host: process.env.PGHOST,
-  user: process.env.PGUSER,
-  password: process.env.PGPASSWORD,
-  database: process.env.PGDATABASE,
-  ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false,
-});
+const ssl = process.env.PGSSLMODE === "require" ? { rejectUnauthorized: false } : false;
+
+const db = process.env.DATABASE_URL
+  ? new Pool({ connectionString: process.env.DATABASE_URL, ssl })
+  : new Pool({
+      host: process.env.PGHOST,
+      user: process.env.PGUSER,
+      password: process.env.PGPASSWORD,
+      database: process.env.PGDATABASE,
+      port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
+      ssl,
+    });
+
+// Verify the connection on startup
+db.query("SELECT NOW()")
+  .then(() => console.log("Database connected"))
+  .catch((err) => console.error("Database connection failed:", err.message));
 ```
 
 The same connection module also exists at **`src/dbConn.js`** for direct database access from the frontend build process if needed.
@@ -243,6 +255,10 @@ Create a `.env` file in the project root with these variables:
 
 ```env
 # Neon PostgreSQL Database
+# Preferred: a single connection string
+DATABASE_URL=postgresql://user:pass@host.neon.tech/dbname?sslmode=require
+
+# Optional individual fields (used only when DATABASE_URL is not set)
 PGHOST=your-neon-host.neon.tech
 PGUSER=your-username
 PGPASSWORD=your-password

@@ -75,10 +75,28 @@ app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-// Centralized error handler
+// Centralized error handler. Any error that a route does not catch ends up
+// here, and we always return a readable message (never a blank error).
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({ error: err.message || "Internal server error" });
+  // Log the full error for us developers to debug.
+  console.error(err);
+
+  let status = err.status || 500;
+  let message = "Something went wrong on the server.";
+
+  // Give a proper message even when the error object has no message at all.
+  if (err && err.message) {
+    message = err.message;
+  }
+
+  // Make database/network problems friendlier for the user instead of
+  // showing a raw low-level error code.
+  if (err && (err.code === "ETIMEDOUT" || err.code === "ECONNREFUSED" || err.message === "Could not reach the database.")) {
+    status = 503;
+    message = "Could not reach the database. Please check the connection and try again.";
+  }
+
+  res.status(status).json({ error: message });
 });
 
 const PORT = process.env.PORT || 3001;
