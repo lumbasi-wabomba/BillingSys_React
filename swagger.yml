@@ -2,10 +2,6 @@ openapi: 3.0.0
 info:
   title: Billing System API
   version: 1.0.0
-  description: >
-    Lets CampusCore pull product listings, prices, and stock levels for the
-    thrift marketplace, surface market trends and "bought together"
-    recommendations, and manage per-SKU discounts as promotions go live.
 
 paths:
   /products:
