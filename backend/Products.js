@@ -4,6 +4,7 @@ import db from "./db.js";
 const router = express.Router();
 
 const allowedFields = [
+  "icon",
   "name",
   "sku",
   "category",

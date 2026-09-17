@@ -86,7 +86,16 @@ export default function ProductDetail({
               height: 180,
             }}
           >
-            {product.icon || "📦"}
+
+            <img
+              src={product.icon}
+              alt={`${product.name} icon`}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain",
+              }}
+            />
           </div>
 
           {/* Product Information */}

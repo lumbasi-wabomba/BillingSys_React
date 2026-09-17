@@ -1,5 +1,8 @@
 {
   "type": "module",
+  "scripts": {
+    "start": "node dbServer.js"
+  },
   "dependencies": {
     "pg-promise": "^12.7.0"
   }

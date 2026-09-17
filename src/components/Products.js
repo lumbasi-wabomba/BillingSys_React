@@ -15,7 +15,7 @@ const mapProduct = (product) => ({
   qty: Number(product.quantity || 0),
   minQty: Number(product.minQty || 0),
   warehouse: product.warehouse || "Main Store",
-  icon: getProductIcon(product.category),
+  icon: product.icon || getProductIcon(product.category),
   status:
     Number(product.quantity || 0) === 0? "Out of Stock": 
     Number(product.quantity || 0) <= Number(product.minQty || 0)? "Low Stock": "Active",
@@ -194,6 +194,7 @@ export default function Products({ onProductClick }) {
               }
             >
               {view === "table" ? "Grid": "Table"}
+             
             </button>
 
             <button

@@ -5,6 +5,7 @@ const API_BASE_URL = "http://localhost:3001/api";
 
 export default function AddProduct({ onSuccess, onCancel, product = null }) {
   const [formData, setFormData] = useState({
+    icon: product?.icon || "📦",
     name: product?.name || "",
     sku: product?.sku || "",
     category: product?.category || "",
@@ -27,6 +28,7 @@ export default function AddProduct({ onSuccess, onCancel, product = null }) {
       ...prev,
       [name]:
         [
+          "i",
           "bp",
           "sp",
           "quantity",
@@ -74,6 +76,7 @@ export default function AddProduct({ onSuccess, onCancel, product = null }) {
       if (onSuccess) onSuccess(data);
 
       setFormData({
+        icon: "",
         name: "",
         sku: "",
         category: "",
@@ -138,6 +141,18 @@ export default function AddProduct({ onSuccess, onCancel, product = null }) {
           )}
 
           <form onSubmit={handleSubmit}>
+
+            <div style={{ marginBottom: 20 }}>
+              <label>Product Icon</label>
+              <input
+                type="varchar"
+                name="icon"
+                value={formData.icon}
+                onChange={handleChange}
+                style={inputStyle}
+              />
+            </div>
+
 
             <div style={{ marginBottom: 20 }}>
               <label>Product Name *</label>

@@ -3,9 +3,9 @@ import db from "./db.js";
 
 const router = express.Router();
 
-const allowedFields = ["name", "role", "emp_date", "salary", "password", "email", "phone"];
+const allowedFields = ['name', 'role', 'emp_date', 'salary', 'password', 'email', 'phone'];
 
-const getPayload = (body) => {
+const getPayload = () => {
   const payload = {};
   allowedFields.forEach((field) => {
     if (body[field] !== undefined) {
