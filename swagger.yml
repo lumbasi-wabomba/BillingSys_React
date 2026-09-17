@@ -1,0 +1,346 @@
+openapi: 3.0.0
+info:
+  title: Billing System API
+  version: 1.0.0
+
+paths:
+  /products:
+    get:
+      summary: Return all available products
+      responses:
+        '200':
+          description: A list of available products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductSummary'
+              example:
+                - sku: "ACC-0231"
+                  name: "Type-C Fast Charger 33W"
+                  category: "Chargers"
+                  brand: "Oraimo"
+                  unit: "piece"
+                  sp: 1200.00
+                  quantity: 18
+                - sku: "ACC-0455"
+                  name: "Wireless Earbuds E9"
+                  category: "Audio"
+                  brand: "Boult"
+                  unit: "piece"
+                  sp: 2500.00
+                  quantity: 7
+
+  /products/{sku}:
+    get:
+      summary: Return details for a specific product
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ACC-0231"
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+              example:
+                sku: "ACC-0231"
+                name: "Type-C Fast Charger 33W"
+                category: "Chargers"
+                brand: "Oraimo"
+                unit: "piece"
+                sp: 1200.00
+                quantity: 18
+                minqty: 5
+                warehouse: "Tom Mboya Street Store"
+        '404':
+          description: No product exists with the given SKU
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "not_found"
+                message: "No product with SKU ACC-0231"
+
+  /insights/trends:
+    get:
+      summary: Return market trend statistics across products
+      parameters:
+        - name: since
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          example: "2026-08-01"
+      responses:
+        '200':
+          description: Market trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrendPoint'
+              example:
+                - sku: "ACC-0231"
+                  viewCount: 340
+                  purchaseCount: 41
+                
+                - sku: "ACC-0771"
+                  viewCount: 190
+                  purchaseCount: 6
+            
+
+  /insights/products-bought-together:
+    get:
+      summary: Return products frequently purchased together with a given SKU
+      parameters:
+        - name: sku
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "ACC-0231"
+      responses:
+        '200':
+          description: Recommended products frequently co-purchased
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoPurchase'
+              example:
+                - sku: "ACC-0908"
+                  name: "Braided Type-C Cable 1m"
+                  coPurchaseCount: 27
+                - sku: "ACC-1120"
+                  name: "Power Bank 10000mAh"
+                  coPurchaseCount: 14
+
+  /discounts/{sku}:
+    patch:
+      summary: Update a product's discount amount
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ACC-0455"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscountUpdate'
+            example:
+              amount: 300.00
+      responses:
+        '200':
+          description: Discount updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+              example:
+                sku: "ACC-0455"
+                amount: 300.00
+                updatedAt: "2026-09-07T14:32:00Z"
+        '400':
+          description: Invalid discount amount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "invalid_amount"
+                message: "amount must be a positive number"
+        '404':
+          description: No product exists with the given SKU
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "not_found"
+                message: "No product with SKU ACC-0455"
+
+  /products/{sku}/views:
+    post:
+      summary: Log a view event for a product
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ACC-0455"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViewEvent'
+            example:
+              viewedAt: "2026-09-07T14:32:00Z"
+              userId: "u-2291"
+      responses:
+        '201':
+          description: View event recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ViewEventRecord'
+              example:
+                id: "ve-88213"
+                sku: "ACC-0455"
+                viewedAt: "2026-09-07T14:32:00Z"
+        '404':
+          description: No product exists with the given SKU
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "not_found"
+                message: "No product with SKU ACC-0455"
+
+components:
+  schemas:
+    ProductSummary:
+      type: object
+      required: [sku, name, category, brand, unit, sp, quantity]
+      properties:
+        sku:
+          type: string
+          maxLength: 20
+          example: "ACC-0231"
+        name:
+          type: string
+          maxLength: 50
+          example: "Type-C Fast Charger 33W"
+        category:
+          type: string
+          maxLength: 25
+          example: "Chargers"
+        brand:
+          type: string
+          maxLength: 50
+          example: "Oraimo"
+        unit:
+          type: string
+          maxLength: 25
+          example: "piece"
+        sp:
+          type: number
+          format: float
+          description: Selling price in KES
+          example: 1200.00
+        quantity:
+          type: integer
+          nullable: true
+          example: 18
+
+    ProductDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProductSummary'
+        - type: object
+          properties:
+            minqty:
+              type: integer
+              nullable: true
+              description: Reorder threshold
+              example: 5
+            warehouse:
+              type: string
+              maxLength: 50
+              example: "Tom Mboya Street Store"
+
+    TrendPoint:
+      type: object
+      required: [sku, viewCount, purchaseCount, demandScore]
+      properties:
+        sku:
+          type: string
+        viewCount:
+          type: integer
+        purchaseCount:
+          type: integer
+        
+    CoPurchase:
+      type: object
+      required: [sku, name, coPurchaseCount]
+      properties:
+        sku:
+          type: string
+        name:
+          type: string
+        coPurchaseCount:
+          type: integer
+
+    DiscountUpdate:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          format: float
+          minimum: 0
+          description: Discount amount in KES
+
+    Discount:
+      type: object
+      required: [sku, amount, updatedAt]
+      properties:
+        sku:
+          type: string
+        amount:
+          type: number
+          format: float
+        updatedAt:
+          type: string
+          format: date-time
+
+    ViewEvent:
+      type: object
+      required: [viewedAt]
+      properties:
+        viewedAt:
+          type: string
+          format: date-time
+        userId:
+          type: string
+
+    ViewEventRecord:
+      type: object
+      required: [id, sku, viewedAt]
+      properties:
+        id:
+          type: string
+        sku:
+          type: string
+        viewedAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/lwt-0da/POSCampuscore/1.0.0

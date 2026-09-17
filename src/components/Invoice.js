@@ -3,6 +3,7 @@ import { getProductIcon } from "../utils/iconMapper";
 
 const API_BASE_URL = "http://localhost:3001/api";
 
+
 function Invoice({ navigate }) { 
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
