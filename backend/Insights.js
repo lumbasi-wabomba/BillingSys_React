@@ -40,15 +40,28 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/trends", async (req, res) => {
-  
+  try{
+    
+  }catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+
   console.log("Trends endpoint hit");
   res.json({ message: "Trends endpoint hit" });
 });
 
 router.get("/products-bought-together", async (req, res) => {
+    try{
+      const result = await db.query("SELECT cart, i_date FROM invoices WHERE cart IS NOT NULL ORDER BY i_date DESC");
+      res.json(result.rows);
     
-    console.log("Products bought together endpoint hit");
-    res.json({ message: "Products bought together endpoint hit" });
+  }catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+    // console.log("Products bought together endpoint hit");
+    // res.json({ message: "Products bought together endpoint hit" });
   
 });
 
