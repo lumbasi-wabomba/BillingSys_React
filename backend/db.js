@@ -15,15 +15,9 @@ if (rootEnv.error) {
   dotenv.config();
 }
 
-const ssl = process.env.PGSSLMODE === "require" ? { rejectUnauthorized: false } : false;
-
-// This pool is what all the route files use to talk to the database.
-// If DATABASE_URL exists we use it (simplest: one string holds everything).
-// Otherwise we build a pool from the individual PG* environment values.
 const db = process.env.DATABASE_URL
   ? new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl,
       // Stop waiting after a while so the server does not hang forever
       // if the database is down or the network is blocking it.
       connectionTimeoutMillis: 10000,
@@ -42,11 +36,10 @@ const db = process.env.DATABASE_URL
 // early if the database is not reachable, instead of only seeing errors
 // when the first request comes in.
 db.query("SELECT NOW()")
-  .then(() => console.log("✅ Database connected"))
+  .then(() => console.log("Database connected"))
   .catch((err) =>
     console.error(
-      "❌ Database connection failed:",
-      // Sometimes network errors have an empty message, so give a fallback.
+      "Database connection failed:",
       err && err.message ? err.message : "Could not reach the database."
     )
   );

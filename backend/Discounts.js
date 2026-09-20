@@ -3,7 +3,7 @@ import db from "./db.js";
 
 const router = express.Router();
 
-const allowedFields = ["product_id", "amount", "authorizer", "start_date", "end_date"];
+const allowedFields = ["product_id", "amount", "start_date", "end_date"];
 
 const getPayload = (body) => {
   const payload = {};
@@ -29,8 +29,8 @@ router.post("/", async (req, res) => {
   const payload = getPayload(req.body);
   try {
     const result = await db.query(
-      "INSERT INTO discounts (product_id, amount, authorizer, start_date, end_date) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [payload.product_id, payload.amount, payload.authorizer, payload.start_date, payload.end_date]
+      "INSERT INTO discounts (product_id, amount, start_date, end_date) VALUES ($1, $2, $3, $4) RETURNING *",
+      [payload.product_id, payload.amount, payload.start_date, payload.end_date]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.patch("/:id", async (req, res) => {
+router.patch("/:product_id", async (req, res) => {
   const payload = getPayload(req.body);
   const fields = Object.keys(payload);
   if (fields.length === 0) {
@@ -62,6 +62,6 @@ router.patch("/:id", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
-});
+}); 
 
-export default router;  
+export default router; 

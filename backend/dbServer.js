@@ -93,13 +93,6 @@ app.use((err, req, res, next) => {
     message = err.message;
   }
 
-  // Make database/network problems friendlier for the user instead of
-  // showing a raw low-level error code.
-  if (err && (err.code === "ETIMEDOUT" || err.code === "ECONNREFUSED" || err.message === "Could not reach the database.")) {
-    status = 503;
-    message = "Could not reach the database. Please check the connection and try again.";
-  }
-
   res.status(status).json({ error: message });
 });
 

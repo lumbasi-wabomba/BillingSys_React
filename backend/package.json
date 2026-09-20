@@ -1,9 +1,21 @@
 {
-  "type": "module",
-  "scripts": {
-    "start": "node dbServer.js"
-  },
+  "name": "node-backend",
+  "version": "1.0.0",
+  "main": "dbServer.js",
   "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "mysql2": "^3.22.5",
+    "pg": "^8.23.0",
     "pg-promise": "^12.7.0"
+  },
+  "scripts": {
+    "start": "node dbServer.js",
+    "dev": "nodemon dbServer.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.4",
+    "nodemon": "^3.1.14"
   }
 }
