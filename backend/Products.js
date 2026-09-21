@@ -38,6 +38,7 @@ router.get("/", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM products ORDER BY name ASC");
     res.json(result.rows);
+    res.status(200).json({ message: "list of products retrieved successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -77,9 +78,11 @@ router.get("/:product_id", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
     res.json(result.rows[0]);
+    res.status(200).json({ message: "product found" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
+    
   }
 });
 

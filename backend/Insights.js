@@ -33,6 +33,7 @@ router.post("/", async (req, res) => {
       [payload.product_id, payload.total_views]
     );
     res.status(201).json(result.rows[0]);
+    res.status(201).json({ message: "insight created successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -52,6 +53,7 @@ router.get("/trends", async (req, res) => {
     );
 
     res.json(result.rows);
+    res.status(200).json({ message: "trends data retrieved successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -62,6 +64,7 @@ router.get("/products-bought-together", async (req, res) => {
     try{
       const result = await db.query("SELECT cart, i_date FROM invoices WHERE cart IS NOT NULL ORDER BY i_date DESC");
       res.json(result.rows);
+      res.status(200).json({ message: "products bought together data retrieved successfully" });
     
   }catch (err) {
     console.error(err);
