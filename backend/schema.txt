@@ -7,6 +7,15 @@ CREATE TABLE "customers" (
 	"no_of_orders" integer,
 	CONSTRAINT "no_of_orders_non_negative" CHECK ((no_of_orders >= 0))
 );
+CREATE TABLE "discounts" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"product_id" uuid NOT NULL,
+	"amount" numeric(10, 2) NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now(),
+	"start_date" timestamp with time zone DEFAULT now() NOT NULL,
+	"end_date" timestamp with time zone,
+	CONSTRAINT "discount_amount_non_negative" CHECK ((amount >= (0)::numeric))
+);
 CREATE TABLE "expenses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"e_date" timestamp with time zone DEFAULT now(),
@@ -19,8 +28,8 @@ CREATE TABLE "expenses" (
 	"supplier" uuid,
 	"product" uuid,
 	"authorizer" uuid,
-	CONSTRAINT "require_cheque" CHECK (((payment_method)::text = 'cheque'::text)),
-	CONSTRAINT "require_mpesa" CHECK (((payment_method)::text = 'mpesa'::text))
+	CONSTRAINT "require_cheque" CHECK ((((payment_method)::text <> 'cheque'::text) OR (cheque_no IS NOT NULL))),
+	CONSTRAINT "require_mpesa" CHECK ((((payment_method)::text <> 'mpesa'::text) OR (mpesa_code IS NOT NULL)))
 );
 CREATE TABLE "invoices" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -30,6 +39,11 @@ CREATE TABLE "invoices" (
 	"total" numeric(10, 2),
 	"i_date" timestamp with time zone DEFAULT now(),
 	"status" varchar(50) DEFAULT 'pending' NOT NULL
+);
+CREATE TABLE "product_views" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"product_id" uuid NOT NULL CONSTRAINT "product_views_product_id_key" UNIQUE,
+	"total_views" integer DEFAULT 0
 );
 CREATE TABLE "products" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -43,6 +57,7 @@ CREATE TABLE "products" (
 	"quantity" integer,
 	"minqty" integer,
 	"warehouse" varchar(50) NOT NULL,
+	"icon" varchar(500),
 	CONSTRAINT "check_bp_sp" CHECK ((sp > bp))
 );
 CREATE TABLE "suppliers" (
@@ -64,17 +79,30 @@ CREATE TABLE "users" (
 	"email" varchar(50) NOT NULL CONSTRAINT "users_email_key" UNIQUE
 );
 CREATE UNIQUE INDEX "customers_pkey" ON "customers" ("id");
+CREATE UNIQUE INDEX "discounts_pkey" ON "discounts" ("id");
+CREATE UNIQUE INDEX "discounts_product_key" ON "discounts" ("product_id");
 CREATE UNIQUE INDEX "expenses_pkey" ON "expenses" ("id");
 CREATE UNIQUE INDEX "invoices_pkey" ON "invoices" ("id");
+CREATE UNIQUE INDEX "product_views_pkey" ON "product_views" ("id");
+CREATE UNIQUE INDEX "product_views_product_id_key" ON "product_views" ("product_id");
+CREATE INDEX "product_views_product_idx" ON "product_views" ("product_id");
 CREATE UNIQUE INDEX "products_pkey" ON "products" ("id");
 CREATE UNIQUE INDEX "products_sku_key" ON "products" ("sku");
 CREATE UNIQUE INDEX "suppliers_pkey" ON "suppliers" ("id");
 CREATE UNIQUE INDEX "users_email_key" ON "users" ("email");
 CREATE UNIQUE INDEX "users_phone_key" ON "users" ("phone");
 CREATE UNIQUE INDEX "users_pkey" ON "users" ("id");
+ALTER TABLE "discounts" ADD CONSTRAINT "discounts_product_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id");
 ALTER TABLE "expenses" ADD CONSTRAINT "expenses_authorizer_fkey" FOREIGN KEY ("authorizer") REFERENCES "users"("id");
 ALTER TABLE "expenses" ADD CONSTRAINT "expenses_product_fkey" FOREIGN KEY ("product") REFERENCES "products"("id");
 ALTER TABLE "expenses" ADD CONSTRAINT "expenses_supplier_fkey" FOREIGN KEY ("supplier") REFERENCES "suppliers"("id");
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "customers"("id");
 ALTER TABLE "invoices" ADD CONSTRAINT "invoices_supplier_id_fkey" FOREIGN KEY ("supplier_id") REFERENCES "suppliers"("id");
+ALTER TABLE "product_views" ADD CONSTRAINT "product_views_product_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id");
 ALTER TABLE "suppliers" ADD CONSTRAINT "suppliers_authorizer_fkey" FOREIGN KEY ("authorizer") REFERENCES "users"("id");
+
+
+
+
+
+	

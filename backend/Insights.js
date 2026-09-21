@@ -40,15 +40,22 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/trends", async (req, res) => {
-  try{
-    
-  }catch (err) {
+  try {
+    const result = await db.query(
+    `WITH cart_items AS (
+    SELECT item->>'id' AS product_id,(item->>'quantity')::int AS quantity,(item->>'price')::numeric AS price
+    FROM invoices,jsonb_array_elements(cart) AS item WHERE status = 'paid'),sales AS (
+      SELECT product_id,SUM(quantity) AS units_sold FROM cart_items GROUP BY product_id) 
+    SELECT p.id, p.name,COALESCE(v.total_views, 0) AS "viewCount",COALESCE(s.units_sold, 0) AS "unitsSold"
+    FROM products p LEFT JOIN product_views v ON v.product_id = p.id LEFT JOIN sales s ON s.product_id = p.id::text
+    ORDER BY "unitsSold" DESC, "viewCount" DESC LIMIT 20`
+    );
+
+    res.json(result.rows);
+  } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
-
-  console.log("Trends endpoint hit");
-  res.json({ message: "Trends endpoint hit" });
 });
 
 router.get("/products-bought-together", async (req, res) => {
