@@ -323,7 +323,7 @@ npm run build
 
 ```bash
 docker build -t billingsys-react .
-docker run -p 80:80 billingsys-react
+docker run -p 3000:3000 -p 3001:3001 billingsys-react
 ```
 
 ---

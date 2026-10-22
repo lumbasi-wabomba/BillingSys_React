@@ -313,3 +313,81 @@ curl -X PATCH "http://localhost:3001/api/discounts/e3b0c442-98fc-11ee-b9d1-0242a
    ```
 
    The React application opens at `http://localhost:3000` and proxies API calls to `http://localhost:3001/api/*`.
+
+   ### Import external suppliers
+
+   Import supplier records through `POST /api/integrations/suppliers`. The endpoint accepts
+   an array or an object containing a `data` array. External fields are mapped as
+   follows:
+
+   - `market` becomes `address`
+   - `category` becomes `speciality`
+
+   ```bash
+   curl -X POST "http://localhost:3001/api/integrations/suppliers" \
+     -H "Content-Type: application/json" \
+     -d '[
+       {
+         "id": 2,
+         "name": "Fresh Threads KE",
+         "category": "Streetwear",
+         "market": "Gikomba Market",
+         "phone": "+254798001234",
+         "email": "freshthreads@example.com",
+         "verified": true
+       }
+     ]'
+   ```
+
+   ### Import external purchases
+
+   The database stores purchases in the `expenses` table. Import purchases through
+   `POST /api/integrations/purchases`. The database generates its own UUIDs.
+   External vendor and product IDs are retained as metadata because numeric
+   external IDs cannot be used as this system's UUID foreign keys.
+
+   ```json
+   {
+     "data": [
+       {
+         "referenceNumber": "THR-PC-8F8F3C94",
+         "vendorId": 5,
+         "productId": 9,
+         "quantity": 1,
+         "totalAmount": 1800,
+         "currency": "KES",
+         "status": "confirmed",
+         "createdAt": "2026-10-12T06:29:23Z"
+       }
+     ]
+   }
+   ```
+
+   ### Import external products
+
+   Import products through `POST /api/integrations/products`. The external
+   `price` is stored as the buying price (`bp`), and the selling price (`sp`) is
+   calculated using the default 20% markup.
+
+   ```json
+   {
+     "data": [
+       {
+         "id": 1,
+         "vendorId": 1,
+         "name": "Denim Jacket, Size M",
+         "category": "Vintage",
+         "brand": "Levi's",
+         "price": 750,
+         "currency": "KES",
+         "quantityAvailable": 3
+       }
+     ]
+   }
+   ```
+
+   The importer generates `sku`, uses `piece` as the unit, uses `External` as the
+   warehouse, and sets `minqty` to `0`. It also creates a matching summary in the
+   `expenses` table using `price * quantityAvailable` as the purchase total. For
+   the example above, `bp` is `750.00`, `sp` is `900.00`, and the expense total is
+   `2250.00`.
