@@ -4,9 +4,10 @@ import db from "./db.js";
 const router = express.Router();
 
 router.post("/", async (req, res) => {
+
   const records = Array.isArray(req.body) ? req.body : req.body?.data;
   if (!Array.isArray(records) || records.length === 0) {
-    return res.status(400).json({ error: "Send purchase data as an array or as { data: [] }." });
+    return res.status(400).json({ error: "Send purchase data as an array ." });
   }
 
   for (const p of records) {
@@ -73,3 +74,9 @@ router.post("/", async (req, res) => {
 });
 
 export default router;
+
+
+
+router.post("/", async (req, res) => {
+  
+});

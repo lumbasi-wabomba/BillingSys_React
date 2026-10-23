@@ -3,6 +3,7 @@ import db from "./db.js";
 
 const router = express.Router();
 
+
 const allowedFields = ["product_id", "total_views"];
 
 const getPayload = (body) => {

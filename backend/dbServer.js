@@ -54,9 +54,11 @@ import PurchaseRouter from "./Purchase.js";
 import DiscountRouter from "./Discounts.js";
 import InsightRouter from "./Insights.js";
 import ApiDocs from "./ApiDocs.js";
+import ApiCalls from "./ApiCalls.js";
 import SupplierImportRouter from "./SupplierImport.js";
 import PurchaseImportRouter from "./PurchaseImport.js";
 import ProductImportRouter from "./ProductImport.js";
+
 
 const app = express();
 
@@ -82,6 +84,7 @@ app.use("/api/purchases", PurchaseRouter);
 app.use("/api/discounts", DiscountRouter);
 app.use("/api/insights", InsightRouter);
 app.use("/api/docs", ApiDocs);
+app.use("/api/external", ApiCalls);
 
 // 404 handler for unmatched routes
 app.use((req, res) => {
