@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import '../App.css';
 
 const API_BASE_URL = 'http://localhost:3001/api';
+api_key = process.env.BACKEND_API_KEY ;
 
 export default function AddCustomer({
   customer = null,

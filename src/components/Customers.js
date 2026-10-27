@@ -3,6 +3,7 @@ import '../App.css';
 import AddCustomer from './AddCustomer';
 
 const API_BASE_URL = 'http://localhost:3001/api';
+const api_key = process.env.BACKEND_API_KEY;
 
 const formatCurrency = (value) =>
   `KSh ${Number(value || 0).toLocaleString()}`;

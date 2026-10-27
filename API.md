@@ -12,11 +12,21 @@ http://localhost:3001/api
 
 ## Authentication
 
-Public access is currently available for demonstration purposes. To simulate the production security model, send a bearer token with each request:
+Protected API endpoints require an API key in the `x-api-key` request header. Configure these keys as environment variables in the project-root `.env` file:
 
-```http
-Authorization: Bearer <your_token_here>
+```env
+TEST_API_KEY=replace-with-a-test-key
+BACKEND_API_KEY=replace-with-a-backend-key
+THRIFTLY_API_KEY=replace-with-a-thriftly-key
 ```
+
+`BACKEND_API_KEY` and `TEST_API_KEY` are accepted by the standard CRUD endpoints. `THRIFTLY_API_KEY` is also accepted by the integrations and analytics endpoints that support Thriftly access.
+
+Requests without an API key return `401 Unauthorized`. Requests with an invalid API key return `403 Forbidden`. Never commit real API keys to source control or expose them in frontend code.
+
+## Rate Limiting
+
+All backend requests are subject to a global rate limit of **3 requests per 10-minute window per client**. When the limit is exceeded, the API returns `429 Too Many Requests` and includes standard rate-limit headers. Clients should wait for the advertised window before retrying.
 
 ## Quickstart
 
@@ -24,9 +34,11 @@ Retrieve the list of products:
 
 ```bash
 curl -X GET "http://localhost:3001/api/products" \
-  -H "Authorization: Bearer demo-token" \
+  -H "x-api-key: $BACKEND_API_KEY" \
   -H "Accept: application/json"
 ```
+
+Include the `x-api-key` header in requests to all protected endpoints documented below.
 
 ## Endpoints
 

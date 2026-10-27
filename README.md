@@ -17,6 +17,7 @@ A full-stack **Point-of-Sale (POS) and Inventory Management** application built 
 - [Tech Stack](#tech-stack)
 - [Frontend Architecture (React)](#frontend-architecture-react)
 - [Backend Overview](#backend-overview)
+- [API Security and Rate Limiting](#api-security-and-rate-limiting)
 - [Features](#features)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Environment Variables](#environment-variables)
@@ -196,6 +197,29 @@ The same connection module also exists at **`src/dbConn.js`** for direct databas
 
 Contains the full PostgreSQL schema definition for all tables: products, customers, suppliers, users, invoices, sales, expenses, purchases, and more.
 
+### API Security and Rate Limiting
+
+The backend protects API routes with API keys and requires clients to send a valid key in the `x-api-key` request header. Configure the following secrets in the project-root `.env` file:
+
+```env
+TEST_API_KEY=replace-with-a-test-key
+BACKEND_API_KEY=replace-with-a-backend-key
+THRIFTLY_API_KEY=replace-with-a-thriftly-key
+```
+
+`BACKEND_API_KEY` and `TEST_API_KEY` are accepted by the standard CRUD endpoints. `THRIFTLY_API_KEY` is also accepted by the integrations and analytics endpoints that support Thriftly access. Requests without a key return `401`; requests with an invalid key return `403`.
+
+Example request:
+
+```bash
+curl http://localhost:3001/api/products \
+  -H "x-api-key: $BACKEND_API_KEY"
+```
+
+All backend requests are also subject to rate limiting. The current policy allows **3 requests per 10-minute window per client**, returns `429 Too Many Requests` after the limit is reached, and includes standard rate-limit headers in responses. The limiter is applied globally, including to API routes, so clients should handle `429` responses and retry after the advertised window.
+
+Never commit real API keys to source control or expose them in frontend code. Use environment or deployment secrets, and keep `example.env` limited to placeholder values.
+
 ---
 
 ## Features
@@ -265,7 +289,14 @@ PGPASSWORD=your-password
 PGDATABASE=your-db-name
 PGSSLMODE=require
 # sslmode: set to 'require' for Neon
+
+# API authentication keys
+TEST_API_KEY=replace-with-a-test-key
+BACKEND_API_KEY=replace-with-a-backend-key
+THRIFTLY_API_KEY=replace-with-a-thriftly-key
 ```
+
+The API keys are required in the `x-api-key` header for protected backend routes. See [API Security and Rate Limiting](#api-security-and-rate-limiting) for the accepted keys, error responses, and the global rate-limit policy.
 
 ---
 

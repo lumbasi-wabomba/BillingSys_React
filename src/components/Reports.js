@@ -3,6 +3,7 @@ import '../App.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const API_BASE_URL = 'http://localhost:3001/api';
+const api_key = process.env.BACKEND_API_KEY;
 
 const ChartComponent = ({ data }) => {
   return (

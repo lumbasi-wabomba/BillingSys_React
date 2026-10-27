@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 const API_BASE_URL = "http://localhost:3001/api";
+const api_key = process.env.BACKEND_API_KEY;
 
 // ---- Component ----
 

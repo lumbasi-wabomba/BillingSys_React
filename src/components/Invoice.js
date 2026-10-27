@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getProductIcon } from "../utils/iconMapper";
 
 const API_BASE_URL = "http://localhost:3001/api";
+const api_key = process.env.BACKEND_API_KEY;
 
 
 function Invoice({ navigate }) { 

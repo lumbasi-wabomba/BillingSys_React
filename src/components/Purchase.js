@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 // import { products as originalProducts } from "./Products";
 
 const API_BASE_URL = "http://localhost:3001/api";
+const api_key = process.env.BACKEND_API_KEY;
 
 function Purchase({ navigate }) {
   const [products, setProducts] = useState([]);
