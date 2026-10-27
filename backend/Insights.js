@@ -1,5 +1,6 @@
 import express from "express";
 import db from "./db.js";
+import apiKeyMiddleware from "./APISecurity.js";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ const getPayload = (body) => {
   return payload;
 };
 
-router.get("/", async (req, res) => {
+router.get("/", apiKeyMiddleware(['backend','test','thriftly']), async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM product_views ORDER BY total_views DESC");
     res.json(result.rows);
@@ -26,7 +27,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", apiKeyMiddleware(['backend','test','thriftly']), async (req, res) => {
   const payload = getPayload(req.body);
   try {
     const result = await db.query(
@@ -41,7 +42,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/trends", async (req, res) => {
+router.get("/trends", apiKeyMiddleware(['backend','test','thriftly']), async (req, res) => {
   try {
     const result = await db.query(
     `WITH cart_items AS (
@@ -61,7 +62,7 @@ router.get("/trends", async (req, res) => {
   }
 });
 
-router.get("/products-bought-together", async (req, res) => {
+router.get("/products-bought-together", apiKeyMiddleware(['backend','test','thriftly']), async (req, res) => {
     try{
       const result = await db.query("SELECT cart, i_date FROM invoices WHERE cart IS NOT NULL ORDER BY i_date DESC");
       res.json(result.rows);

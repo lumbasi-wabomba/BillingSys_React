@@ -28,7 +28,6 @@ const db = process.env.DATABASE_URL
       password: process.env.PGPASSWORD,
       database: process.env.PGDATABASE,
       port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,
-      ssl,
       connectionTimeoutMillis: 10000,
     });
 

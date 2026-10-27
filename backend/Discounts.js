@@ -1,5 +1,6 @@
 import express from "express";
 import db from "./db.js";
+import apiKeyMiddleware from "./APISecurity.js";
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ const getPayload = (body) => {
   return payload;
 };
 
-router.get("/", async (req, res) => {
+router.get("/", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM discounts ORDER BY start_date DESC");
     res.json(result.rows);
@@ -26,7 +27,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", apiKeyMiddleware(['backend','test','thriftly']), async (req, res) => {
   const payload = getPayload(req.body);
   try {
     const result = await db.query(
@@ -41,7 +42,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.patch("/:product_id", async (req, res) => {
+router.patch("/:product_id", apiKeyMiddleware(['backend','test','thriftly']), async (req, res) => {
   const payload = getPayload(req.body);
   const fields = Object.keys(payload);
   if (fields.length === 0) {
@@ -54,7 +55,7 @@ router.patch("/:product_id", async (req, res) => {
   try {
     const result = await db.query(
       `UPDATE discounts SET ${assignments} WHERE id = $${fields.length + 1} RETURNING *`,
-      [...values, req.params.id]
+      [...values, req.params.product_id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Discount not found" });

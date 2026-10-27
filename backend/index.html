@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Billing System API Documentation</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Arial, sans-serif;
+        color: #1f2937;
+        background: #f8fafc;
+      }
+
+      body {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+      }
+
+      h2 {
+        margin-top: 36px;
+      }
+
+      .intro {
+        color: #475569;
+      }
+
+      .endpoint {
+        margin: 20px 0;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgb(15 23 42 / 5%);
+      }
+
+      .endpoint h3 {
+        margin-top: 0;
+      }
+
+      .method {
+        display: inline-block;
+        min-width: 64px;
+        margin-right: 8px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .get { background: #2563eb; }
+      .patch { background: #d97706; }
+      .post { background: #16a34a; }
+
+      code {
+        font-family: "Courier New", monospace;
+      }
+
+      pre {
+        overflow-x: auto;
+        padding: 14px;
+        background: #0f172a;
+        border-radius: 6px;
+        color: #e2e8f0;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+
+      .purpose {
+        color: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Billing System API</h1>
+    <p class="intro">Public API endpoint documentation. The endpoint paths below are relative to <code>/api</code>.</p>
+
+    <h2>Server</h2>
+    <pre><code>https://billingsys-react-5514a.containers.snapdeploy.app/api</code></pre>
+
+    <h2>Endpoints</h2>
+
+    <article class="endpoint">
+      <h3><span class="method get">GET</span><code>/products</code></h3>
+      <p>Returns the complete list of products.</p>
+      <h4>Example data</h4>
+      <pre><code>[
+  {
+    "id": "35afadb4-1ded-4fa1-87d8-b64761712667",
+    "name": "Anker 20000mAh Power Bank",
+    "sku": "ELC019",
+    "category": "Accessories",
+    "brand": "Anker",
+    "unit": "Piece",
+    "sp": "6500.00",
+    "bp": "5200.00",
+    "quantity": 32,
+    "minqty": 8,
+    "warehouse": "Main Warehouse",
+    "icon": null
+  },
+  {
+    "id": "53ce8c8a-4039-4ac0-8d31-7bc742c53182",
+    "name": "Canon PIXMA Printer",
+    "sku": "ELC012",
+    "category": "Printers",
+    "brand": "Canon",
+    "unit": "Piece",
+    "sp": "18500.00",
+    "bp": "16000.00",
+    "quantity": 5,
+    "minqty": 2,
+    "warehouse": "Main Warehouse",
+    "icon": null
+  },
+  {
+    "id": "17b86a99-8c25-42cb-b4b6-c7eb35166bef",
+    "name": "Dell Inspiron 15",
+    "sku": "ELC005",
+    "category": "Laptops",
+    "brand": "Dell",
+    "unit": "Piece",
+    "sp": "82000.00",
+    "bp": "74000.00",
+    "quantity": 6,
+    "minqty": 2,
+    "warehouse": "Main Warehouse",
+    "icon": null
+  },
+  {
+    "id": "d2ecd67b-28fe-4ef6-8618-3dc82cbd0115",
+    "name": "Drone",
+    "sku": "123455667sdf",
+    "category": "electronic",
+    "brand": "boeing",
+    "unit": "piece",
+    "sp": "120000.00",
+    "bp": "80000.00",
+    "quantity": 1225,
+    "minqty": 1,
+    "warehouse": "licoln airbase",
+    "icon": null
+  }
+]</code></pre>
+      <h4>cURL</h4>
+      <pre><code>curl -X GET "https://billingsys-react-5514a.containers.snapdeploy.app/api/products"</code></pre>
+    </article>
+
+    <article class="endpoint">
+      <h3><span class="method get">GET</span><code>/products/{product_id}</code></h3>
+      <p>Returns the details for one product.</p>
+      <h4>Path parameter</h4>
+      <p><code>product_id</code> — ID of the product.</p>
+      <h4>Example data</h4>
+      <pre><code>{
+  "id": "17b86a99-8c25-42cb-b4b6-c7eb35166bef",
+  "name": "Dell Inspiron 15",
+  "sku": "ELC005",
+  "category": "Laptops",
+  "brand": "Dell",
+  "unit": "Piece",
+  "sp": "82000.00",
+  "bp": "74000.00",
+  "quantity": 6,
+  "minqty": 2,
+  "warehouse": "Main Warehouse",
+  "icon": null
+}</code></pre>
+      <h4>cURL</h4>
+      <pre><code>curl -X GET "https://billingsys-react-5514a.containers.snapdeploy.app/api/products/PRODUCT_ID"</code></pre>
+    </article>
+
+    <article class="endpoint">
+      <h3><span class="method get">GET</span><code>/insights/trends</code></h3>
+      <p>Returns product market trend statistics based on recorded views and sales.</p>
+      <h4>Example data</h4>
+      <pre><code>[
+  {
+    "id": "323d3d29-7c01-4ae4-ab63-a5d2aaf4e747",
+    "product_id": "17b86a99-8c25-42cb-b4b6-c7eb35166bef",
+    "total_views": 26
+  },
+  {
+    "id": "07852551-424e-4735-8574-b10aecadeaaf",
+    "product_id": "08780763-d779-4593-b3f1-6857c40ef966",
+    "total_views": 20
+  }
+]</code></pre>
+      <h4>cURL</h4>
+      <pre><code>curl -X GET "https://billingsys-react-5514a.containers.snapdeploy.app/api/insights/trends"</code></pre>
+    </article>
+
+    <article class="endpoint">
+      <h3><span class="method get">GET</span><code>/insights/products-bought-together</code></h3>
+      <p>Returns invoice cart data showing products that were purchased together.</p>
+      <h4>Example data</h4>
+      <pre><code>{
+  "cart": [
+    {
+      "id": "35afadb4-1ded-4fa1-87d8-b64761712667",
+      "sku": "ELC019",
+      "name": "Anker 20000mAh Power Bank",
+      "price": 6500,
+      "quantity": 1
+    },
+    {
+      "id": "b6e34566-d259-4614-ba97-e9743b3f5c92",
+      "sku": "ELC008",
+      "name": "HP USB Keyboard",
+      "price": 1800,
+      "quantity": 1
+    },
+    {
+      "id": "e6cf811f-d9cf-4556-b36a-47a932c4fdb0",
+      "sku": "ELC020",
+      "name": "Oraimo Fast Charger 20W",
+      "price": 1800,
+      "quantity": 1
+    },
+    {
+      "id": "1da7073b-449d-4711-846d-490f40887f08",
+      "sku": "ELC011",
+      "name": "Seagate 2TB External HDD",
+      "price": 11500,
+      "quantity": 1
+    }
+  ],
+  "i_date": "2026-09-20T10:55:07.536Z"
+}</code></pre>
+      <h4>cURL</h4>
+      <pre><code>curl -X GET "https://billingsys-react-5514a.containers.snapdeploy.app/api/insights/products-bought-together"</code></pre>
+    </article>
+
+    <article class="endpoint">
+      <h3><span class="method patch">PATCH</span><code>/discounts/{product_id}</code></h3>
+      <p>Updates the discount details for a product.</p>
+      <h4>Path parameter</h4>
+      <p><code>product_id</code> — ID of the product.</p>
+      <h4>Request body</h4>
+      <pre><code>{
+  "product_id": "47898d22-3b2a-4b97-9aac-048ae01a5bda",
+  "amount": 1850,
+  "start_date": "2026-09-12 10:44:05.122+00",
+  "end_date": "2026-09-20 06:44:05.122+00"
+}</code></pre>
+      <h4>cURL</h4>
+      <pre><code>curl -X PATCH "https://billingsys-react-5514a.containers.snapdeploy.app/api/discounts/PRODUCT_ID" \
+  -H "Content-Type: application/json" \
+  -d '{"product_id":"47898d22-3b2a-4b97-9aac-048ae01a5bda","amount":1850,"start_date":"2026-09-12 10:44:05.122+00","end_date":"2026-09-20 06:44:05.122+00"}'</code></pre>
+    </article>
+
+    <article class="endpoint">
+      <h3><span class="method post">POST</span><code>/insights/</code></h3>
+      <p>Records a view event for a product and increments its view total.</p>
+      <h4>Request body</h4>
+      <pre><code>{
+  "product_id": "17b86a99-8c25-42cb-b4b6-c7eb35166bef",
+  "total_views": 26
+}</code></pre>
+      <h4>cURL</h4>
+      <pre><code>curl -X POST "https://billingsys-react-5514a.containers.snapdeploy.app/api/insights/" \
+  -H "Content-Type: application/json" \
+  -d '{"product_id":"17b86a99-8c25-42cb-b4b6-c7eb35166bef","total_views":26}'</code></pre>
+    </article>
+  </body>
+</html>

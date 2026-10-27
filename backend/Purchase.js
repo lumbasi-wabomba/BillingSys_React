@@ -1,5 +1,6 @@
 import express from "express";
 import db from "./db.js";
+import apiKeyMiddleware from "./APISecurity.js";
 
 const router = express.Router();
 const allowedFields = [
@@ -41,7 +42,7 @@ const getPayload = (body) => {
   return payload;
 };
 
-router.get("/", async (req, res) => {
+router.get("/", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM expenses ORDER BY e_date DESC");
     res.json(result.rows);
@@ -51,7 +52,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM expenses WHERE id = $1", [req.params.id]);
     if (result.rows.length === 0) {
@@ -64,7 +65,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const payload = getPayload(req.body);
     const fields = Object.keys(payload);
@@ -100,7 +101,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const payload = getPayload(req.body);
     const fields = Object.keys(payload);
@@ -126,7 +127,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const result = await db.query("DELETE FROM expenses WHERE id = $1 RETURNING id", [req.params.id]);
     if (result.rows.length === 0) {

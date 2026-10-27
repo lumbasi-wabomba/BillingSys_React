@@ -1,5 +1,6 @@
 import express from "express";
 import db from "./db.js";
+import apiKeyMiddleware from "./APISecurity.js";
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ const getPayload = (body) => {
   return payload;
 };
 
-router.get("/", async (req, res) => {
+router.get("/", apiKeyMiddleware(['backend','test','thriftly']), async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM products ORDER BY name ASC");
     res.json(result.rows);
@@ -45,7 +46,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/search/:query", async (req, res) => {
+router.get("/search/:query", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const result = await db.query(
       "SELECT * FROM products WHERE name ILIKE $1 OR sku ILIKE $1 ORDER BY name ASC",
@@ -58,7 +59,7 @@ router.get("/search/:query", async (req, res) => {
   }
 });
 
-router.get("/category/:category", async (req, res) => {
+router.get("/category/:category", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const result = await db.query(
       "SELECT * FROM products WHERE category = $1 ORDER BY name ASC",
@@ -71,7 +72,7 @@ router.get("/category/:category", async (req, res) => {
   }
 });
 
-router.get("/:product_id", async (req, res) => {
+router.get("/:product_id", apiKeyMiddleware(['backend','test','thriftly']), async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM products WHERE id = $1", [req.params.product_id]);
     if (result.rows.length === 0) {
@@ -86,7 +87,7 @@ router.get("/:product_id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const payload = getPayload(req.body);
     const fields = Object.keys(payload);
@@ -107,7 +108,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:product_id", async (req, res) => {
+router.put("/:product_id", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const payload = getPayload(req.body);
     const fields = Object.keys(payload);
@@ -133,7 +134,7 @@ router.put("/:product_id", async (req, res) => {
   }
 });
 
-router.delete("/:product_id", async (req, res) => {
+router.delete("/:product_id", apiKeyMiddleware(['backend','test']), async (req, res) => {
   try {
     const result = await db.query("DELETE FROM products WHERE id = $1 RETURNING id", [req.params.product_id]);
     if (result.rows.length === 0) {

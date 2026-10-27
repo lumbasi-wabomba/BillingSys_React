@@ -1,4 +1,5 @@
 import express from "express";
+import  apiKeyMiddleware from "./APISecurity.js";
 
 
 const thriftly_url = 'https://thriftly-website.onrender.com';
@@ -9,7 +10,7 @@ router.get("/docs", (req, res) => {
   res.redirect(`${thriftly_url}/docs`);
 });
 
-router.get("/products", async (req, res) => {
+router.get("/products", apiKeyMiddleware(['backend','test']), async (req, res) => {
     try{
         const result = await fetch(`${thriftly_url}/products`);
         res.status(result.status).json(await result.json());
@@ -19,7 +20,7 @@ router.get("/products", async (req, res) => {
     }
 });
 
-router.get("/products/:id", async (req, res) => {
+router.get("/products/:id", apiKeyMiddleware(['backend','test']), async (req, res) => {
     try{
         const result = await fetch(`${thriftly_url}/products/${req.params.id}`);
         res.status(result.status).json(await result.json());
@@ -29,7 +30,7 @@ router.get("/products/:id", async (req, res) => {
     }
 });
 
-router.get("/vendors", async (req, res) => {
+router.get("/vendors", apiKeyMiddleware(['backend','test']), async (req, res) => {
     try{
         const result =  await fetch(`${thriftly_url}/vendors`);
         res.status(result.status).json(await result.json());
@@ -39,7 +40,7 @@ router.get("/vendors", async (req, res) => {
     }
 });
 
-router.get("/vendors/:id", async (req, res) => {
+router.get("/vendors/:id", apiKeyMiddleware(['backend','test']), async (req, res) => {
     try{
         const result = await fetch(`${thriftly_url}/vendors/${req.params.id}`);
         res.status(result.status).json(await result.json());
@@ -48,7 +49,7 @@ router.get("/vendors/:id", async (req, res) => {
         res.status(500).json({ message: "Error fetching vendor details from Thriftly" });
     }
 });
-router.post("/purchases", async (req, res) => {
+router.post("/purchases", apiKeyMiddleware(['backend','test']), async (req, res) => {
     try{
         const result = await fetch(`${thriftly_url}/purchases`, {
             method: "POST",
@@ -65,7 +66,7 @@ router.post("/purchases", async (req, res) => {
     }
 });
 
-router.get("/purchases" , async (req, res) => {
+router.get("/purchases", apiKeyMiddleware(['backend','test']), async (req, res) => {
     try{
         const result = await fetch(`${thriftly_url}/purchases`, {
             method: "GET",
