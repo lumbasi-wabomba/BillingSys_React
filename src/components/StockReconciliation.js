@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import '../App.css';
 
 const API_BASE_URL = "http://localhost:3001/api";
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
 export default function StockReconciliation() {
   const [items, setItems] = useState([]);
@@ -14,7 +18,7 @@ export default function StockReconciliation() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/products`)
+    fetch(`${API_BASE_URL}/products`, { headers: backend_headers })
       .then(res => res.json())
       .then(data => {
         const normalized = Array.isArray(data) ? data.map(p => ({

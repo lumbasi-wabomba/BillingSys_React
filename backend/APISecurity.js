@@ -3,6 +3,7 @@ dotenv.config();
 
 const keys = {
     backend: process.env.BACKEND_API_KEY,
+    campuscore: process.env.CAMPUSCORE_API_KEY,
     thriftly: process.env.THRIFTLY_API_KEY,
     test: process.env.TEST_API_KEY
 };

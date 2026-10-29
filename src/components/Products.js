@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import "../App.css";
 import AddProduct from "./AddProduct";
+import AddProductImport from "./AddProductImport";
 import { getProductIcon } from "../utils/iconMapper";
 
 const API_BASE_URL = "http://localhost:3001/api";
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
 const stockColor = (status) =>
   status === "Active"? "success": status === "Low Stock"? "warning": "danger";
@@ -31,9 +36,11 @@ export default function Products({ onProductClick }) {
   const [warehouseFilter, setWarehouseFilter] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showProductImportModal, setShowProductImportModal] = useState(false);
+  const [prefilledProduct, setPrefilledProduct] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/products`)
+    fetch(`${API_BASE_URL}/products`, { headers: backend_headers })
       .then((res) => res.json())
       .then((data) => {
         setProducts(Array.isArray(data) ? data.map(mapProduct) : []);
@@ -81,6 +88,33 @@ export default function Products({ onProductClick }) {
     }
   };
 
+  // Called when a product is selected from the import window.
+  // Maps the external Thriftly product to the local product form shape
+  // so the AddProduct form opens pre-filled with the product's data.
+  const handleProductImportSelect = (product) => {
+    setPrefilledProduct({
+      icon: product?.icon || "\uD83D\uDCE6",
+      name: product.name || "",
+      sku: `EXT-${product.id || ""}`,
+      category: product.category || "",
+      brand: product.brand || "",
+      unit: product.unit || "piece",
+      bp: product.price != null ? Number(product.price) : "",
+      sp:
+        product.price != null
+          ? Number((product.price * 1.2).toFixed(2))
+          : "",
+      quantity:
+        product.quantityAvailable != null
+          ? Number(product.quantityAvailable)
+          : "",
+      minQty: 0,
+      warehouse: "External",
+    });
+    setShowProductImportModal(false);
+    setShowModal(true);
+  };
+
   if (loading) {
     return <h3>Loading products...</h3>;
   }
@@ -91,14 +125,15 @@ export default function Products({ onProductClick }) {
       {showModal && (
         <div
           style={{position: "fixed",inset: 0,background: "rgba(0,0,0,.5)",display: "flex",justifyContent: "center",alignItems: "center",zIndex: 1000,}}
-          onClick={() => { setShowModal(false); setEditingProduct(null); }}
+          onClick={() => { setPrefilledProduct(null); setShowModal(false); setEditingProduct(null); }}
         >
           <div
             onClick={(e) => e.stopPropagation()}
             style={{width: "55%",maxHeight: "90vh",overflow: "auto",background: "#fff",borderRadius: 8,}}
           >
             <AddProduct
-              product={editingProduct}
+              product={prefilledProduct || editingProduct}
+              prefilled={!!prefilledProduct}
               onSuccess={(newProduct) => {
                 if (editingProduct) {
                   // Update existing product in list
@@ -107,13 +142,22 @@ export default function Products({ onProductClick }) {
                   // Add new product
                   setProducts((prev) => [...prev, mapProduct(newProduct)]);
                 }
+                setPrefilledProduct(null);
                 setShowModal(false);
                 setEditingProduct(null);
               }}
-              onCancel={() => { setShowModal(false); setEditingProduct(null); }}
+              onCancel={() => { setPrefilledProduct(null); setShowModal(false); setEditingProduct(null); }}
             />
           </div>
         </div>
+      )}
+
+      {/* Product import modal */}
+      {showProductImportModal && (
+        <AddProductImport
+          onProductSelect={handleProductImportSelect}
+          onCancel={() => setShowProductImportModal(false)}
+        />
       )}
 
       <div
@@ -206,6 +250,13 @@ export default function Products({ onProductClick }) {
               }}
             >
               + Add Product
+            </button>
+
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => setShowProductImportModal(true)}
+            >
+              + Import Product
             </button>
 
           </div>

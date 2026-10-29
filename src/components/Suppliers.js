@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import '../App.css';
 import AddSupplier from './AddSupplier';
+import AddVendor from './AddVendor';
 
 const API_BASE_URL = 'http://localhost:3001/api';
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
 const mapSupplier = (supplier) => ({
   ...supplier,
@@ -17,9 +22,11 @@ export default function Suppliers() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [showVendorModal, setShowVendorModal] = useState(false);
+  const [prefilledSupplier, setPrefilledSupplier] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/suppliers`)
+    fetch(`${API_BASE_URL}/suppliers`, { headers: backend_headers })
       .then((res) => res.json())
       .then((data) => {
         const normalized = Array.isArray(data)
@@ -39,6 +46,22 @@ export default function Suppliers() {
     (s.name || '').toLowerCase().includes(search.toLowerCase()) ||
     (s.contact || '').toLowerCase().includes(search.toLowerCase())
   );
+
+  // Called when a vendor is selected from the import window.
+  // Maps the external vendor to the supplier form shape so the
+  // AddSupplier form opens pre-filled with the vendor's data.
+  const handleVendorSelect = (vendor) => {
+    setPrefilledSupplier({
+      name: vendor.name || '',
+      address: vendor.market || '',
+      email: vendor.email || '',
+      phone: vendor.phone || '',
+      speciality: vendor.category || '',
+      authorizer: vendor.authorizer || '',
+    });
+    setShowVendorModal(false);
+    setShowModal(true);
+  };
 
   if (loading) {
     return <h3>Loading suppliers...</h3>;
@@ -71,12 +94,13 @@ export default function Suppliers() {
             }}
           >
              <AddSupplier
-               supplier={selectedSupplier}
+               supplier={prefilledSupplier || selectedSupplier}
+               prefilled={!!prefilledSupplier}
                onSuccess={(savedSupplier) => {
  
                  if (selectedSupplier) {
  
-                   // Update edited customer
+                   // Update edited supplier
                    setSuppliers((prev) =>
                      prev.map((s) =>
                        s.id === savedSupplier.id
@@ -94,15 +118,25 @@ export default function Suppliers() {
                  }
  
                  setSelectedSupplier(null);
+                 setPrefilledSupplier(null);
                  setShowModal(false);
                }}
                onCancel={() => {
                  setSelectedSupplier(null);
+                 setPrefilledSupplier(null);
                  setShowModal(false);
                }}
              />
           </div>
         </div>
+      )}
+
+      {/* Vendor import modal */}
+      {showVendorModal && (
+        <AddVendor
+          onVendorSelect={handleVendorSelect}
+          onCancel={() => setShowVendorModal(false)}
+        />
       )}
 
       {/* Statistics */}
@@ -163,6 +197,13 @@ export default function Suppliers() {
               onClick={() => setShowModal(true)}
             >
               + Add Supplier
+            </button>
+
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => setShowVendorModal(true)}
+            >
+              + Import Vendor
             </button>
           </div>
         </div>

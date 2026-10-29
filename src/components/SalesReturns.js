@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import '../App.css';
 
 const API_BASE_URL = 'http://localhost:3001/api';
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
 export default function SalesReturns() {
   const [returnsData, setReturnsData] = useState([]);
@@ -12,7 +16,7 @@ export default function SalesReturns() {
   useEffect(() => {
     // Fetch returns/exchange data (this endpoint may need to be created in backend)
     // For now, we can fetch invoices and filter for returns
-    fetch(`${API_BASE_URL}/invoices`)
+    fetch(`${API_BASE_URL}/invoices`, { headers: backend_headers })
       .then(res => res.json())
       .then(data => {
         // Mock returns data from invoices - would need a dedicated returns endpoint

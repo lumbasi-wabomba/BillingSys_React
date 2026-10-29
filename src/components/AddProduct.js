@@ -2,9 +2,15 @@ import React, { useState } from "react";
 import "../App.css";
 
 const API_BASE_URL = "http://localhost:3001/api";
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
-export default function AddProduct({ onSuccess, onCancel, product = null }) {
+export default function AddProduct({ onSuccess, onCancel, product = null, prefilled = false }) {
+  const isEdit = product !== null && !prefilled;
+
   const [formData, setFormData] = useState({
     icon: product?.icon || "📦",
     name: product?.name || "",
@@ -56,14 +62,12 @@ export default function AddProduct({ onSuccess, onCancel, product = null }) {
 
     try {
       const response = await fetch(
-        product
+        isEdit
           ? `${API_BASE_URL}/products/${product.id}`
           : `${API_BASE_URL}/products`,
         {
-          method: product ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          method: isEdit ? "PUT" : "POST",
+          headers: backend_headers,
           body: JSON.stringify(formData),
         }
       );
@@ -122,7 +126,7 @@ export default function AddProduct({ onSuccess, onCancel, product = null }) {
       >
         <div className="table-card-header">
           <div className="table-card-title">
-            {product ? "Edit Product" : "Add New Product"}
+            {isEdit ? "Edit Product" : "Add New Product"}
           </div>
         </div>
 
@@ -301,10 +305,10 @@ export default function AddProduct({ onSuccess, onCancel, product = null }) {
                 }}
               >
                 {loading
-                  ? product
+                  ? isEdit
                     ? "Updating..."
                     : "Adding..."
-                  : product
+                  : isEdit
                   ? "Update Product"
                   : "Add Product"}
               </button>

@@ -11,7 +11,11 @@ import {
 } from "lucide-react";
 
 const API_BASE_URL = "http://localhost:3001/api";
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
 // ---- Component ----
 
@@ -27,7 +31,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchJson = (url) =>
-      fetch(url).then(r => {
+      fetch(url, { headers: backend_headers }).then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status} from ${url}`);
         return r.json();
       });

@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import { getProductIcon } from "../utils/iconMapper";
 
 const API_BASE_URL = "http://localhost:3001/api";
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
 
 function Invoice({ navigate }) { 
@@ -14,7 +18,7 @@ function Invoice({ navigate }) {
   const [status, setStatus] = useState("paid");
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/products`)
+    fetch(`${API_BASE_URL}/products`, { headers: backend_headers })
       .then((res) => res.json())
       .then((data) => {
         const cleanedProducts = Array.isArray(data) ? data.map(p => ({

@@ -3,7 +3,11 @@ import '../App.css';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const API_BASE_URL = 'http://localhost:3001/api';
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
 const ChartComponent = ({ data }) => {
   return (
@@ -39,8 +43,8 @@ export default function Reports() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE_URL}/invoices`).then(r => r.json()),
-      fetch(`${API_BASE_URL}/products`).then(r => r.json()).catch(() => []),
+      fetch(`${API_BASE_URL}/invoices`, { headers: backend_headers }).then(r => r.json()),
+      fetch(`${API_BASE_URL}/products`, { headers: backend_headers }).then(r => r.json()).catch(() => []),
     ])
       .then(([invoices, products]) => {
         const invoiceArray = Array.isArray(invoices) ? invoices : [];

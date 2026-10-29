@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import '../App.css';
 
 const API_BASE_URL = 'http://localhost:3001/api';
-const api_key = process.env.BACKEND_API_KEY;
+const api_key = process.env.REACT_APP_BACKEND_API_KEY;
+const backend_headers = {
+  "x-api-key": `${api_key}`,
+  "Content-Type": "application/json"
+};
 
 export default function AddUser({
   user = null,
@@ -66,9 +70,7 @@ export default function AddUser({
 
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: backend_headers,
         body: JSON.stringify(payload),
       });
 
